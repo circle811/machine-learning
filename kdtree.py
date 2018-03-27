@@ -94,20 +94,21 @@ class KDTree:
 
     def query(self, x, k, metric='l2_square'):
         heap = Heap()
-        self._dfs(x, k, distance_function[metric], heap, self.root)
-        return heap.items()
+        self._search_k(x, k, distance_function[metric], heap, self.root)
+        l = heap.items()
+        return np.array([it[0] for it in l]), np.array([it[1] for it in l])
 
-    def _dfs(self, x, k, distance, heap, node):
+    def _search_k(self, x, k, distance, heap, node):
         if len(heap) == k and distance(x, np.clip(x, node.lower, node.upper)) >= heap.max()[1]:
             return
 
         if isinstance(node, Inner):
             if x[node.split_d] < node.split_v:
-                self._dfs(x, k, distance, heap, node.left)
-                self._dfs(x, k, distance, heap, node.right)
+                self._search_k(x, k, distance, heap, node.left)
+                self._search_k(x, k, distance, heap, node.right)
             else:
-                self._dfs(x, k, distance, heap, node.right)
-                self._dfs(x, k, distance, heap, node.left)
+                self._search_k(x, k, distance, heap, node.right)
+                self._search_k(x, k, distance, heap, node.left)
         else:
             d = distance(x, self.X[node.points])
             for i in range(len(node.points)):
@@ -116,3 +117,23 @@ class KDTree:
                 elif d[i] < heap.max()[1]:
                     heap.pop_max()
                     heap.push(node.points[i], d[i])
+
+    def query_radius(self, x, r, metric='l2_square'):
+        l = []
+        self._search_r(x, r, distance_function[metric], l, self.root)
+        i = np.concatenate([it[0] for it in l])
+        d = np.concatenate([it[1] for it in l])
+        si = np.argsort(d)
+        return i[si], d[si]
+
+    def _search_r(self, x, r, distance, l, node):
+        if distance(x, np.clip(x, node.lower, node.upper)) > r:
+            return
+
+        if isinstance(node, Inner):
+            self._search_r(x, r, distance, l, node.left)
+            self._search_r(x, r, distance, l, node.right)
+        else:
+            d = distance(x, self.X[node.points])
+            mask = d <= r
+            l.append([node.points[mask], d[mask]])
