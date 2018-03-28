@@ -2,6 +2,8 @@ import numpy as np
 
 from kdtree import KDTree
 
+__all__ = ['KNNClassifier', 'KNNRegressor']
+
 
 def count(Y, n_classes):
     c = np.zeros(n_classes, dtype=np.int64)
