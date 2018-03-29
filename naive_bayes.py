@@ -19,8 +19,7 @@ class NBBase:
 
     def predict_proba(self, X):
         s = self.decision_function(X)
-        s -= np.max(s, axis=1)[:, np.newaxis]
-        p = np.exp(s)
+        p = np.exp(s - np.max(s, axis=1)[:, np.newaxis])
         p /= np.sum(p, axis=1)[:, np.newaxis]
         return p
 
@@ -94,7 +93,7 @@ class GaussianNB(NBBase):
         self.sigma_ += 1e-9 * np.maximum(0.1, np.max(self.sigma_))
 
     def decision_function(self, X):
-        return (self.class_log_prior_ +
-                -0.5 * np.sum(np.log(self.sigma_) +
-                              np.square(X[:, np.newaxis, :] - self.theta_) / self.sigma_,
-                              axis=2))
+        return (self.class_log_prior_
+                - 0.5 * np.sum(np.log(self.sigma_), axis=1)
+                - 0.5 * np.hstack([np.sum(np.square(X - self.theta_[i]) / self.sigma_[i], axis=1)[:, np.newaxis]
+                                   for i in range(self.classes_.shape[0])]))
