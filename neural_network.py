@@ -28,7 +28,7 @@ class NeuralNetworkBase:
         self.loss_curve_ = None
 
     def fit(self, X, Y):
-        layer_size = X.shape[1:] + self.hidden_layer_sizes + (self.get_output_size(),)
+        layer_size = X.shape[1:] + self.hidden_layer_sizes + (self._output_size(),)
         n_layers = len(layer_size) - 1
         self.coefs_ = []
         self.intercepts_ = []
@@ -37,21 +37,21 @@ class NeuralNetworkBase:
             self.coefs_.append(np.sqrt(2 / n_in) * np.random.randn(n_in, n_out))
             self.intercepts_.append(np.sqrt(2 / n_in) * np.random.randn(n_out))
         parameters = to_dict(self.coefs_, self.intercepts_)
-        self.optimizer.minimize(parameters, self.forward_backward)
-        self.loss_curve_ = self.optimizer.run(X, Y, 100, self.batch_size)
+        self.optimizer.minimize(parameters, self._loss_gradient)
+        self.loss_curve_ = self.optimizer.run(X, Y, self.batch_size, self.max_iter)
 
     def predict(self, X):
         raise NotImplementedError
 
     def decision_function(self, X):
         n_samples = X.shape[0]
-        return np.vstack([self.forward(X[i: i + self.batch_size])
+        return np.vstack([self._forward(X[i: i + self.batch_size])
                           for i in range(0, n_samples, self.batch_size)])
 
-    def get_output_size(self):
+    def _output_size(self):
         raise NotImplementedError
 
-    def forward(self, X):
+    def _forward(self, X):
         n_layers = len(self.coefs_)
         s = X
         for i in range(n_layers - 1):
@@ -59,7 +59,8 @@ class NeuralNetworkBase:
         s = s @ self.coefs_[-1] + self.intercepts_[-1]
         return s
 
-    def forward_backward(self, X, Y):
+    def _loss_gradient(self, X, Y):
+        # forward pass
         n_layers = len(self.coefs_)
         s = X
         ss = [s]
@@ -68,25 +69,30 @@ class NeuralNetworkBase:
             ss.append(s)
         s = s @ self.coefs_[-1] + self.intercepts_[-1]
 
+        # backward pass
+        loss, grad_s = self._loss_gradient_output(s, Y)
+        reg_loss = (0.5 * self.alpha) * np.sum([np.sum(np.square(w)) for w in self.coefs_])
+
         grad_w = [None] * n_layers
         grad_b = [None] * n_layers
-        loss, grad_s = self.loss_gradient(s, Y)
-        loss += (0.5 * self.alpha) * np.sum([np.sum(np.square(w)) for w in self.coefs_])
         for i in range(n_layers - 1, 0, -1):
             grad_w[i] = ss[i].T @ grad_s + self.alpha * self.coefs_[i]
             grad_b[i] = np.sum(grad_s, axis=0)
             grad_s = (grad_s @ self.coefs_[i].T) * (ss[i] > 0)
-
         grad_w[0] = ss[0].T @ grad_s + self.alpha * self.coefs_[0]
         grad_b[0] = np.sum(grad_s, axis=0)
 
-        return loss, to_dict(grad_w, grad_b)
+        return loss + reg_loss, to_dict(grad_w, grad_b)
 
-    def loss_gradient(self, s, Y):
+    def _loss_gradient_output(self, s, Y):
         raise NotImplementedError
 
 
 class NeuralNetworkClassifier(NeuralNetworkBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.classes_ = None
+
     def fit(self, X, Y):
         self.classes_, Yi = np.unique(Y, return_inverse=True)
         super().fit(X, Yi)
@@ -101,14 +107,15 @@ class NeuralNetworkClassifier(NeuralNetworkBase):
         p /= np.sum(p, axis=1)[:, np.newaxis]
         return p
 
-    def get_output_size(self):
+    def _output_size(self):
         return self.classes_.shape[0]
 
-    def loss_gradient(self, s, Y):
+    def _loss_gradient_output(self, s, Y):
+        n_samples = s.shape[0]
+
         p = np.exp(s - np.max(s, axis=1)[:, np.newaxis])
         p /= np.sum(p, axis=1)[:, np.newaxis]
 
-        n_samples = s.shape[0]
         a = np.arange(n_samples)
         loss = -np.mean(np.log(p[a, Y]))
         p[a, Y] -= 1
@@ -120,10 +127,10 @@ class NeuralNetworkRegressor(NeuralNetworkBase):
     def predict(self, X):
         return self.decision_function(X)[:, 0]
 
-    def get_output_size(self):
+    def _output_size(self):
         return 1
 
-    def loss_gradient(self, s, Y):
+    def _loss_gradient_output(self, s, Y):
         n_samples = s.shape[0]
         d = s[:, 0] - Y
         loss = 0.5 * np.mean(np.square(d))
