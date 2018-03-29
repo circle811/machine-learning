@@ -6,7 +6,7 @@ __all__ = ['LogisticRegression', 'LinearRegression']
 
 
 class LinearBase:
-    def __init__(self, alpha=1.0, l1_ratio=0.0, optimizer=None, batch_size=200, max_iter=200):
+    def __init__(self, alpha=0.0001, l1_ratio=0.0, optimizer=None, batch_size=200, max_iter=200):
         self.alpha = alpha
         self.l1_ratio = l1_ratio
         if optimizer is not None:
