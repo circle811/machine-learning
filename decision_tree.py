@@ -114,7 +114,7 @@ class Leaf:
 
 
 class DecisionTreeBase:
-    def __init__(self, criterion, splitter='best', max_features=None, max_depth=np.inf, min_impurity_decrease=0.0):
+    def __init__(self, criterion=None, splitter='best', max_features=None, max_depth=np.inf, min_impurity_decrease=0.0):
         self.criterion = criterion
         self.impurity_func = impurity_func_dict[criterion]
         self.impurity_all_split_func = impurity_all_split_func_dict[criterion]
@@ -180,7 +180,7 @@ class DecisionTreeBase:
         return Inner(sum_weight, impurity_decrease, split_feature, split_value, left, right)
 
     def _build_leaf(self, Y, weight):
-        raise NotImplemented
+        raise NotImplementedError
 
     def _best_split(self, X, Y, weight, indexes):
         if self.splitter == 'best':
