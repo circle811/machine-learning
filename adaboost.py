@@ -3,6 +3,8 @@ import numpy as np
 
 from decision_tree import DecisionTreeClassifier
 
+__all__ = ['AdaBoost']
+
 
 class AdaBoost:
     def __init__(self, base_estimator=None, n_estimators=50):
