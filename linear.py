@@ -15,16 +15,16 @@ class LinearBase:
             self.optimizer = AdamOptimizer()
         self.batch_size = batch_size
         self.max_iter = max_iter
-        self.coefs_ = None
-        self.intercepts_ = None
+        self.coef_ = None
+        self.intercept_ = None
         self.loss_curve_ = None
 
     def fit(self, X, Y):
         n_features = X.shape[1]
         n_output = self._output_size()
-        self.coefs_ = np.zeros((n_features, n_output))
-        self.intercepts_ = np.zeros(n_output)
-        parameters = {'w': self.coefs_, 'b': self.intercepts_}
+        self.coef_ = np.zeros((n_features, n_output))
+        self.intercept_ = np.zeros(n_output)
+        parameters = {'w': self.coef_, 'b': self.intercept_}
         self.optimizer.minimize(parameters, self._loss_gradient)
         self.loss_curve_ = self.optimizer.run(X, Y, self.batch_size, self.max_iter)
 
@@ -32,18 +32,18 @@ class LinearBase:
         raise NotImplementedError
 
     def decision_function(self, X):
-        return X @ self.coefs_ + self.intercepts_
+        return X @ self.coef_ + self.intercept_
 
     def _output_size(self):
         raise NotImplementedError
 
     def _loss_gradient(self, X, Y):
-        s = self.decision_function(X)
+        s = X @ self.coef_ + self.intercept_
         loss, grad_s = self._loss_gradient_output(s, Y)
-        reg_loss = self.alpha * (self.l1_ratio * np.sum(np.abs(self.coefs_)) +
-                                 (1 - self.l1_ratio) * 0.5 * np.sum(np.square(self.coefs_)))
-        reg_grad_w = self.alpha * (self.l1_ratio + np.where(self.coefs_ > 0, 1.0, -1.0) +
-                                   (1 - self.l1_ratio) * self.coefs_)
+        reg_loss = self.alpha * (self.l1_ratio * np.sum(np.abs(self.coef_)) +
+                                 (1 - self.l1_ratio) * 0.5 * np.sum(np.square(self.coef_)))
+        reg_grad_w = self.alpha * (self.l1_ratio + np.where(self.coef_ > 0, 1.0, -1.0) +
+                                   (1 - self.l1_ratio) * self.coef_)
         grad = {
             'w': X.T @ grad_s + reg_grad_w,
             'b': np.sum(grad_s, axis=0)
@@ -73,6 +73,10 @@ class LogisticRegression(LinearBase):
         p /= np.sum(p, axis=1)[:, np.newaxis]
         return p
 
+    def decision_function(self, X):
+        s = super().decision_function(X)
+        return np.hstack([s, np.zeros((X.shape[0], 1))])
+
     def _output_size(self):
         return self.classes_.shape[0] - 1
 
@@ -96,8 +100,8 @@ class LinearRegression(LinearBase):
             n_samples, n_features = X.shape
             Xe = np.hstack([X, np.ones((n_samples, 1))])
             w = np.linalg.pinv(Xe.T @ Xe + self.alpha * np.eye(n_features + 1)) @ (Xe.T @ Y)
-            self.coefs_ = w[:-1, np.newaxis]
-            self.intercepts_ = w[-1, np.newaxis]
+            self.coef_ = w[:-1, np.newaxis]
+            self.intercept_ = w[-1, np.newaxis]
         else:
             super().fit(X, Y)
 
