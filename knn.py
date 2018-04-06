@@ -1,6 +1,6 @@
 import numpy as np
 
-from distance import distance_function
+from distance import pairwise_distance_function
 from kdtree import KDTree
 
 __all__ = ['KNNClassifier', 'KNNRegressor']
@@ -39,8 +39,8 @@ class KNNBase:
         if self.algorithm == 'kd_tree':
             return [self.tree.query(X[i], self.n_neighbors, self.metric)[0] for i in range(X.shape[0])]
         else:
-            distance = distance_function[self.metric]
-            d = np.stack([distance(X[i], self.X) for i in range(X.shape[0])])
+            pairwise_distance = pairwise_distance_function[self.metric]
+            d = pairwise_distance(X, self.X)
             return np.argsort(d, axis=1)[:, :self.n_neighbors]
 
 
