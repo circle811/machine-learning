@@ -2,6 +2,8 @@ import numpy as np
 
 from distance import l2_distance, pairwise_l2_distance
 
+__all__ = ['KMeans']
+
 
 class KMeans:
     def __init__(self, n_clusters=8, n_init=10, max_iter=300, tol=1e-4):
