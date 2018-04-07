@@ -1,7 +1,7 @@
 import numpy as np
 
-from distance import pairwise_distance_function
-from kdtree import KDTree
+from ..utils.distance import pairwise_distance_function
+from ..algorithm.kdtree import KDTree
 
 __all__ = ['KNNClassifier', 'KNNRegressor']
 

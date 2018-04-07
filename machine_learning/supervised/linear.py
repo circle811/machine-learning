@@ -1,6 +1,6 @@
 import numpy as np
 
-from optimizer import AdamOptimizer
+from ..algorithm.optimizer import AdamOptimizer
 
 __all__ = ['LogisticRegression', 'LinearRegression']
 

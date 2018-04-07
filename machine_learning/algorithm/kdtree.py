@@ -1,7 +1,7 @@
 import heapq
 import numpy as np
 
-from distance import distance_function
+from ..utils.distance import distance_function
 
 __all__ = ['KDTree']
 

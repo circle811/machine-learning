@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 
-from decision_tree import DecisionTreeClassifier
+from .decision_tree import DecisionTreeClassifier
 
 __all__ = ['AdaBoost']
 

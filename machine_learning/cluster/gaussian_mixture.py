@@ -1,6 +1,6 @@
 import numpy as np
 
-from kmeans import KMeans
+from .kmeans import KMeans
 
 __all__ = ['GaussianMixture']
 

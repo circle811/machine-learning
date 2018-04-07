@@ -1,6 +1,6 @@
 import numpy as np
 
-from distance import l2_distance, pairwise_l2_distance
+from ..utils.distance import l2_distance, pairwise_l2_distance
 
 __all__ = ['KMeans']
 

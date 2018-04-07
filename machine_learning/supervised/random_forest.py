@@ -1,6 +1,6 @@
 import numpy as np
 
-from decision_tree import DecisionTreeClassifier, DecisionTreeRegressor
+from .decision_tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 __all__ = ['RandomForestClassifier', 'RandomForestRegressor']
 
