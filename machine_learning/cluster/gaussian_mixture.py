@@ -38,22 +38,22 @@ class GaussianMixture:
         means = None
         covariances = None
         precisions = None
-        lower_bound_ = -np.inf
+        lower_bound = -np.inf
 
         for _ in range(self.n_init):
             w, m, c, p, l = self._iter(X)
-            if lower_bound_ < l:
+            if lower_bound < l:
                 weights = w
                 means = m
                 covariances = c
                 precisions = p
-                lower_bound_ = l
+                lower_bound = l
 
         self.weights_ = weights
         self.means_ = means
         self.covariances_ = covariances
         self.precisions_ = precisions
-        self.lower_bound_ = lower_bound_
+        self.lower_bound_ = lower_bound
 
     def predict(self, X):
         lp = log_proba(self.weights_, self.means_, self.precisions_, X)

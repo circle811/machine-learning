@@ -3,10 +3,10 @@ import numpy as np
 
 from .decision_tree import DecisionTreeClassifier
 
-__all__ = ['AdaBoost']
+__all__ = ['AdaBoostClassifier']
 
 
-class AdaBoost:
+class AdaBoostClassifier:
     def __init__(self, base_estimator=None, n_estimators=50):
         if base_estimator is not None:
             self.base_estimator = base_estimator
