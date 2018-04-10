@@ -89,8 +89,8 @@ class NeuralNetworkBase:
 
 
 class NeuralNetworkClassifier(NeuralNetworkBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, hidden_layer_sizes=(100,), alpha=0.0001, optimizer=None, batch_size=200, max_iter=200):
+        super().__init__(hidden_layer_sizes, alpha, optimizer, batch_size, max_iter)
         self.classes_ = None
 
     def fit(self, X, Y):

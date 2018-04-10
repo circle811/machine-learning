@@ -55,8 +55,8 @@ class LinearBase:
 
 
 class LogisticRegression(LinearBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, alpha=0.0001, l1_ratio=0.0, optimizer=None, batch_size=200, max_iter=200):
+        super().__init__(alpha, l1_ratio, optimizer, batch_size, max_iter)
         self.classes_ = None
 
     def fit(self, X, Y):

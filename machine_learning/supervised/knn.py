@@ -45,8 +45,8 @@ class KNNBase:
 
 
 class KNNClassifier(KNNBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, n_neighbors=5, metric='l2_square', algorithm='kd_tree', leaf_size=20):
+        super().__init__(n_neighbors, metric, algorithm, leaf_size)
         self.classes_ = None
 
     def fit(self, X, Y):

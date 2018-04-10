@@ -55,6 +55,10 @@ class GaussianMixture:
         self.precisions_ = precisions
         self.lower_bound_ = lower_bound
 
+    def fit_predict(self, X):
+        self.fit(X)
+        return self.predict(X)
+
     def predict(self, X):
         lp = log_proba(self.weights_, self.means_, self.precisions_, X)
         return np.argmax(lp, axis=1)
