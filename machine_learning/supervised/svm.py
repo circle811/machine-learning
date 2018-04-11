@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils.distance import pairwise_l2_distance
+from ..utils.kernel import kernel_function
 
 __all__ = ['SVMClassifier']
 
@@ -54,24 +54,15 @@ def smo(K, Y, C, tol):
             return alpha, compute_b(Y, C, alpha, g)
 
 
-def rbf(X0, X1, gamma):
-    d2 = pairwise_l2_distance(X0, X1, square=True)
-    return np.exp(-gamma * d2)
-
-
 class SVMClassifier:
-    def __init__(self, C=1.0, kernel='rbf', gamma=1.0, tol=1e-4, multi_class='ovr'):
+    def __init__(self, C=1.0, kernel='rbf', degree=3, gamma=1.0, coef0=1.0, tol=1e-4, multi_class='ovr'):
         self.C = C
         self.kernel = kernel
+        self.degree = degree
         self.gamma = gamma
+        self.coef0 = coef0
         self.tol = tol
         self.multi_class = multi_class
-        if kernel == 'rbf':
-            self.kernel_func = lambda X0, X1: rbf(X0, X1, self.gamma)
-        elif kernel == 'linear':
-            self.kernel_func = lambda X0, X1: X0 @ X1.T
-        else:
-            raise ValueError('kernel')
         self.dual_coef_ = None
         self.intercept_ = None
         self.support_vectors_ = None
@@ -80,7 +71,7 @@ class SVMClassifier:
     def fit(self, X, Y):
         self.classes_, Yi = np.unique(Y, return_inverse=True)
         n_classes = self.classes_.shape[0]
-        K = self.kernel_func(X, X)
+        K = self._kernel_func(X, X)
         if n_classes == 2:
             y = np.where(Yi == 0, 1, -1)
             alpha, b = smo(K, y, self.C, self.tol)
@@ -99,7 +90,7 @@ class SVMClassifier:
 
     def predict(self, X):
         n_classes = self.classes_.shape[0]
-        K = self.kernel_func(X, self.support_vectors_)
+        K = self._kernel_func(X, self.support_vectors_)
         scores = K @ self.dual_coef_ + self.intercept_
         if n_classes == 2:
             return self.classes_[np.where(scores[:, 0] > 0, 0, 1)]
@@ -109,6 +100,15 @@ class SVMClassifier:
             return self._predict_ovo(scores)
         else:
             raise ValueError('multi_class')
+
+    def _kernel_func(self, X, Y):
+        params_dict = {
+            'linear': {},
+            'polynomial': {'degree': self.degree, 'gamma': self.gamma, 'coef0': self.coef0},
+            'sigmoid': {'gamma': self.gamma, 'coef0': self.coef0},
+            'rbf': {'gamma': self.gamma}
+        }
+        return kernel_function[self.kernel](X, Y, **params_dict[self.kernel])
 
     def _fit_ovr(self, K, Yi):
         n_samples = K.shape[0]
