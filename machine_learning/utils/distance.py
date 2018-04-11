@@ -30,12 +30,12 @@ def pairwise_l1_distance(X, Y):
 
 
 def pairwise_l2_distance(X, Y, square=False):
-    m = X.shape[0]
-    n = Y.shape[0]
-    d = np.zeros((m, n))
-    for i in range(n):
-        d[:, i] = l2_distance(X, Y[i], square)
-    return d
+    d2 = np.sum(np.square(X), axis=1)[:, np.newaxis] + np.sum(np.square(Y), axis=1) - 2 * (X @ Y.T)
+    d2 = np.maximum(0, d2)
+    if square:
+        return d2
+    else:
+        return np.sqrt(d2)
 
 
 def pairwise_linf_distance(X, Y):
