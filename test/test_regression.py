@@ -57,10 +57,9 @@ class_params_list = [
     (knn.KNNRegressor, dict(n_neighbors=10, metric='l2_square', algorithm='kd_tree')),
     (knn.KNNRegressor, dict(n_neighbors=10, metric='l2_square', algorithm='brute')),
 
-    (linear.LinearRegression, dict(alpha=0.0)),
-    (linear.LinearRegression, dict(alpha=0.0001, l1_ratio=0.0)),
-    (linear.LinearRegression, dict(alpha=0.0001, l1_ratio=0.5)),
-    (linear.LinearRegression, dict(alpha=0.0001, l1_ratio=1.0)),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.0)),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.5)),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=1.0)),
 
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='best', min_impurity_decrease=0.0)),
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='best', min_impurity_decrease=1e-5)),

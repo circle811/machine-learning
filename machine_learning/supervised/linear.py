@@ -42,7 +42,7 @@ class LinearBase:
         loss, grad_s = self._loss_gradient_output(s, Y)
         reg_loss = self.alpha * (self.l1_ratio * np.sum(np.abs(self.coef_)) +
                                  (1 - self.l1_ratio) * 0.5 * np.sum(np.square(self.coef_)))
-        reg_grad_w = self.alpha * (self.l1_ratio + np.where(self.coef_ > 0, 1.0, -1.0) +
+        reg_grad_w = self.alpha * (self.l1_ratio * np.where(self.coef_ > 0, 1.0, -1.0) +
                                    (1 - self.l1_ratio) * self.coef_)
         grad = {
             'w': X.T @ grad_s + reg_grad_w,
@@ -99,7 +99,7 @@ class LinearRegression(LinearBase):
         if self.alpha * self.l1_ratio == 0.0:
             n_samples, n_features = X.shape
             Xe = np.hstack([X, np.ones((n_samples, 1))])
-            w = np.linalg.pinv(Xe.T @ Xe + self.alpha * np.eye(n_features + 1)) @ (Xe.T @ Y)
+            w = np.linalg.pinv(Xe.T @ Xe + n_samples * self.alpha * np.eye(n_features + 1)) @ (Xe.T @ Y)
             self.coef_ = w[:-1, np.newaxis]
             self.intercept_ = w[-1, np.newaxis]
         else:
@@ -113,7 +113,7 @@ class LinearRegression(LinearBase):
 
     def _loss_gradient_output(self, s, Y):
         n_samples = s.shape[0]
-        d = s[:, 0] - Y
+        d = s - Y[:, np.newaxis]
         loss = 0.5 * np.mean(np.square(d))
-        grad = ((1 / n_samples) * d)[:, np.newaxis]
+        grad = (1 / n_samples) * d
         return loss, grad
