@@ -3,6 +3,8 @@ import numpy as np
 from .kdtree import KDTree
 from ..utils.distance import pairwise_distance_function
 
+__all__ = ['NearestNeighbors']
+
 
 class NearestNeighbors:
     def __init__(self, n_neighbors=5, radius=1.0, metric='l2_square', algorithm='kd_tree', leaf_size=20):
@@ -21,10 +23,12 @@ class NearestNeighbors:
         elif self.algorithm != 'brute':
             raise ValueError('algorithm')
 
-    def kneighbors(self, X, n_neighbors=None, return_distance=True):
-        n_samples = X.shape[0]
+    def kneighbors(self, X=None, n_neighbors=None, return_distance=True):
+        if X is None:
+            X = self._fit_X
         if n_neighbors is None:
             n_neighbors = self.n_neighbors
+        n_samples = X.shape[0]
         if self.algorithm == 'kd_tree':
             i_neighbor = np.zeros((n_samples, n_neighbors), dtype=np.int64)
             if return_distance:
@@ -45,10 +49,12 @@ class NearestNeighbors:
             else:
                 return i_neighbor
 
-    def radius_neighbors(self, X, radius=None, return_distance=True):
-        n_samples = X.shape[0]
+    def radius_neighbors(self, X=None, radius=None, return_distance=True):
+        if X is None:
+            X = self._fit_X
         if radius is None:
             radius = self.radius
+        n_samples = X.shape[0]
         if self.algorithm == 'kd_tree':
             i_neighbor = np.zeros(n_samples, dtype=np.object_)
             if return_distance:
@@ -73,3 +79,33 @@ class NearestNeighbors:
                 for i in range(n_samples):
                     i_neighbor[i] = np.where(d[i] <= radius)[0]
                 return i_neighbor
+
+    def kneighbors_graph(self, X=None, n_neighbors=None, mode='connectivity'):
+        n = self._fit_X.shape[0]
+        m = n if X is None else X.shape[0]
+        graph = np.zeros((m, n))
+        if mode == 'connectivity':
+            i_neighbor = self.kneighbors(X, n_neighbors, return_distance=False)
+            graph[np.arange(m)[:, np.newaxis], i_neighbor] = 1
+        elif mode == 'distance':
+            d_neighbor, i_neighbor = self.kneighbors(X, n_neighbors, return_distance=True)
+            graph[np.arange(m)[:, np.newaxis], i_neighbor] = d_neighbor
+        else:
+            raise ValueError('mode')
+        return graph
+
+    def radius_neighbors_graph(self, X=None, radius=None, mode='connectivity'):
+        n = self._fit_X.shape[0]
+        m = n if X is None else X.shape[0]
+        graph = np.zeros((m, n))
+        if mode == 'connectivity':
+            i_neighbor = self.radius_neighbors(X, radius, return_distance=False)
+            for i in range(m):
+                graph[i][i_neighbor[i]] = 1
+        elif mode == 'distance':
+            d_neighbor, i_neighbor = self.radius_neighbors(X, radius, return_distance=True)
+            for i in range(m):
+                graph[i][i_neighbor[i]] = d_neighbor[i]
+        else:
+            raise ValueError('mode')
+        return graph
