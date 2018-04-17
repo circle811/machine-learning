@@ -1,7 +1,6 @@
 import numpy as np
 
-from ..utils.distance import pairwise_distance_function
-from ..algorithm.kdtree import KDTree
+from ..algorithm.neighbors import NearestNeighbors
 
 __all__ = ['KNNClassifier', 'KNNRegressor']
 
@@ -14,34 +13,17 @@ def count2d(Y, n_classes):
     return c
 
 
-class KNNBase:
+class KNNBase(NearestNeighbors):
     def __init__(self, n_neighbors=5, metric='l2_square', algorithm='kd_tree', leaf_size=20):
-        self.n_neighbors = n_neighbors
-        self.metric = metric
-        self.algorithm = algorithm
-        self.leaf_size = leaf_size
-        self.X = None
-        self.Y = None
-        self.tree = None
+        super().__init__(n_neighbors=n_neighbors, metric=metric, algorithm=algorithm, leaf_size=leaf_size)
+        self._Y = None
 
     def fit(self, X, Y):
-        self.X = X
-        self.Y = Y
-        if self.algorithm == 'kd_tree':
-            self.tree = KDTree(X, self.leaf_size)
-        elif self.algorithm != 'brute':
-            raise ValueError('algorithm')
+        super().fit(X)
+        self._Y = Y
 
     def predict(self, X):
         raise NotImplementedError
-
-    def _nearest_neighbors(self, X):
-        if self.algorithm == 'kd_tree':
-            return [self.tree.query(X[i], self.n_neighbors, self.metric)[0] for i in range(X.shape[0])]
-        else:
-            pairwise_distance = pairwise_distance_function[self.metric]
-            d = pairwise_distance(X, self.X)
-            return np.argsort(d, axis=1)[:, :self.n_neighbors]
 
 
 class KNNClassifier(KNNBase):
@@ -62,11 +44,11 @@ class KNNClassifier(KNNBase):
         return c / np.sum(c, axis=1)[:, np.newaxis]
 
     def _count(self, X):
-        neighbors = self._nearest_neighbors(X)
-        return count2d(self.Y[neighbors], self.classes_.shape[0])
+        neighbors = self.kneighbors(X, return_distance=False)
+        return count2d(self._Y[neighbors], self.classes_.shape[0])
 
 
 class KNNRegressor(KNNBase):
     def predict(self, X):
-        neighbors = self._nearest_neighbors(X)
-        return np.mean(self.Y[neighbors], axis=1)
+        neighbors = self.kneighbors(X, return_distance=False)
+        return np.mean(self._Y[neighbors], axis=1)
