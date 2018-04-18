@@ -40,12 +40,14 @@ class PCA:
 
 
 class KernelPCA:
-    def __init__(self, n_components=None, kernel='rbf', degree=3, gamma=1.0, coef0=1.0, alpha=1.0):
+    def __init__(self, n_components=None, kernel='rbf', degree=3, gamma=1.0, coef0=1.0,
+                 fit_inverse_transform=False, alpha=1.0):
         self.n_components = n_components
         self.kernel = kernel
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
+        self.fit_inverse_transform = fit_inverse_transform
         self.alpha = alpha
         self.n_components_ = None
         self.X_fit_ = None
@@ -61,7 +63,7 @@ class KernelPCA:
         self.X_fit_ = X
         K = self._kernel_func(X, X)
 
-        # subtract mean
+        # center
         self.K_fit_rows_ = np.mean(K, axis=0)
         self.K_fit_all_ = np.mean(K)
         Km = K - self.K_fit_rows_[:, np.newaxis] - self.K_fit_rows_ + self.K_fit_all_
@@ -77,11 +79,12 @@ class KernelPCA:
             self.n_components_ = min(pos.shape[0], self.n_components)
         self.lambdas_ = w[-1:-1 - self.n_components_:-1]
         self.alphas_ = v[:, -1:-1 - self.n_components_:-1]
+        self.X_transformed_fit_ = self.alphas_ * np.sqrt(self.lambdas_)
 
         # fit inverse
-        self.X_transformed_fit_ = self.alphas_ * np.sqrt(self.lambdas_)
-        Kt = self._kernel_func(self.X_transformed_fit_, self.X_transformed_fit_)
-        self.dual_coef_ = np.linalg.pinv(Kt + self.alpha * np.eye(n_samples)) @ X
+        if self.fit_inverse_transform:
+            Kt = self._kernel_func(self.X_transformed_fit_, self.X_transformed_fit_)
+            self.dual_coef_ = np.linalg.pinv(Kt + self.alpha * np.eye(n_samples)) @ X
 
     def fit_transform(self, X):
         self.fit(X)
@@ -93,10 +96,13 @@ class KernelPCA:
         return Km @ (self.alphas_ / np.sqrt(self.lambdas_))
 
     def inverse_transform(self, X):
-        K = self._kernel_func(X, self.X_transformed_fit_)
-        return K @ self.dual_coef_
+        if self.fit_inverse_transform:
+            K = self._kernel_func(X, self.X_transformed_fit_)
+            return K @ self.dual_coef_
 
     def _kernel_func(self, X, Y):
+        if self.kernel == 'precomputed':
+            return X
         params_dict = {
             'linear': {},
             'polynomial': {'degree': self.degree, 'gamma': self.gamma, 'coef0': self.coef0},
