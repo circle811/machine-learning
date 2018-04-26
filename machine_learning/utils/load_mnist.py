@@ -3,6 +3,8 @@ import os
 import struct
 import numpy as np
 
+__all__ = ['load_mnist']
+
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../datasets/mnist'))
 
 

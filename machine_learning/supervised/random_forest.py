@@ -4,6 +4,8 @@ from .decision_tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 __all__ = ['RandomForestClassifier', 'RandomForestRegressor']
 
+TINY = np.finfo(np.float64).tiny
+
 
 class RandomForestBase:
     DecisionTree = None
@@ -25,7 +27,7 @@ class RandomForestBase:
         for i in range(self.n_estimators):
             estimator = self.DecisionTree(self.criterion, 'random', self.max_features, self.max_depth,
                                           self.min_impurity_decrease)
-            a = np.random.choice(range(n_samples), size=n_samples)
+            a = np.random.choice(n_samples, size=n_samples, replace=True)
             a.sort()
             estimator.fit(X[a], Y[a])
             estimators.append(estimator)
@@ -35,10 +37,7 @@ class RandomForestBase:
         importances = np.zeros(n_features)
         for estimator in self.estimators_:
             importances += estimator.feature_importances_
-        s = np.sum(importances)
-        if s > 0:
-            importances /= s
-        self.feature_importances_ = importances
+        self.feature_importances_ = importances / np.maximum(TINY, np.sum(importances))
 
     def predict(self, X):
         raise NotImplementedError

@@ -49,7 +49,7 @@ class KMeans:
             labels = np.argmin(d, axis=1)
 
             new_inertia = np.sum(d[a, labels])
-            if new_inertia - inertia >= - self.tol:
+            if inertia - new_inertia <= self.tol:
                 break
 
             new_centers = np.zeros_like(centers)

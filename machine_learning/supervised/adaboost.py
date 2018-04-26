@@ -5,6 +5,8 @@ from .decision_tree import DecisionTreeClassifier
 
 __all__ = ['AdaBoostClassifier']
 
+TINY = np.finfo(np.float64).tiny
+
 
 class AdaBoostClassifier:
     def __init__(self, base_estimator=None, n_estimators=50):
@@ -60,10 +62,7 @@ class AdaBoostClassifier:
         importances = np.zeros(n_features)
         for estimator, alpha in zip(self.estimators_, self.estimator_weights_):
             importances += estimator.feature_importances_ * alpha
-        s = np.sum(importances)
-        if s > 0:
-            importances /= s
-        self.feature_importances_ = importances
+        self.feature_importances_ = importances / np.maximum(TINY, np.sum(importances))
 
     def predict(self, X):
         s = self.decision_function(X)

@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 
 from ..utils.kernel import kernel_function
@@ -5,12 +6,10 @@ from ..utils.kernel import kernel_function
 __all__ = ['SVMClassifier']
 
 
-def optimize(K, Y, C, alpha, g, i):
+def best_j(K, Y, C, alpha, g, i):
     d1 = Y[i] * ((g[i] - Y[i]) - (g - Y))
     d2 = K[i, i] + K.diagonal() - 2 * K[i]
-
-    delta_u = np.zeros_like(alpha)
-    np.divide(-d1, d2, out=delta_u, where=d2 > 0)
+    delta_u = np.divide(-d1, d2, out=np.zeros_like(alpha), where=d2 > 0)
 
     L = np.maximum(-alpha[i], np.where(Y == Y[i], alpha - C, -alpha))
     R = np.minimum(C - alpha[i], np.where(Y == Y[i], alpha, C - alpha))
@@ -37,30 +36,31 @@ def compute_b(Y, C, alpha, g):
         return np.mean(Y[js] - g[js])
 
 
-def smo(K, Y, C, tol):
+def smo(K, Y, C, max_iter, tol):
     n_samples = K.shape[0]
     alpha = np.zeros(n_samples)
     g = np.zeros(n_samples)  # g == (alpha * Y) @ K
-
-    while True:
+    for _ in (range(max_iter) if max_iter >= 0 else itertools.count(0)):
         s = np.random.randint(n_samples)
         for t in range(n_samples):
             i = (s + t) % n_samples
-            j, delta, descent = optimize(K, Y, C, alpha, g, i)
+            j, delta, descent = best_j(K, Y, C, alpha, g, i)
             if descent > tol:
                 update(K, Y, alpha, g, i, j, delta)
                 break
         else:
-            return alpha, compute_b(Y, C, alpha, g)
+            break
+    return alpha, compute_b(Y, C, alpha, g)
 
 
 class SVMClassifier:
-    def __init__(self, C=1.0, kernel='rbf', degree=3, gamma=1.0, coef0=1.0, tol=1e-4, multi_class='ovr'):
+    def __init__(self, C=1.0, kernel='rbf', degree=3, gamma=1.0, coef0=1.0, max_iter=1000, tol=1e-4, multi_class='ovr'):
         self.C = C
         self.kernel = kernel
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
+        self.max_iter = max_iter
         self.tol = tol
         self.multi_class = multi_class
         self.dual_coef_ = None
@@ -74,7 +74,7 @@ class SVMClassifier:
         K = self._kernel_func(X, X)
         if n_classes == 2:
             y = np.where(Yi == 0, 1, -1)
-            alpha, b = smo(K, y, self.C, self.tol)
+            alpha, b = smo(K, y, self.C, self.max_iter, self.tol)
             dual_coef = (y * alpha)[:, np.newaxis]
             intercept = np.array([b])
         elif self.multi_class == 'ovr':
@@ -102,6 +102,8 @@ class SVMClassifier:
             raise ValueError('multi_class')
 
     def _kernel_func(self, X, Y):
+        if self.kernel == 'precomputed':
+            return X
         params_dict = {
             'linear': {},
             'polynomial': {'degree': self.degree, 'gamma': self.gamma, 'coef0': self.coef0},
@@ -117,7 +119,7 @@ class SVMClassifier:
         intercept = np.zeros(n_classes)
         for i in range(n_classes):
             y = np.where(Yi == i, 1, -1)
-            alpha, b = smo(K, y, self.C, self.tol)
+            alpha, b = smo(K, y, self.C, self.max_iter, self.tol)
             dual_coef[:, i] = y * alpha
             intercept[i] = b
         return dual_coef, intercept
@@ -138,7 +140,7 @@ class SVMClassifier:
                 neg = np.where(Yi == j)[0]
                 indexes = np.concatenate([pos, neg])
                 y = np.concatenate([np.ones_like(pos), -np.ones_like(neg)])
-                alpha, neg = smo(K[indexes[:, np.newaxis], indexes], y, self.C, self.tol)
+                alpha, neg = smo(K[indexes[:, np.newaxis], indexes], y, self.C, self.max_iter, self.tol)
                 dual_coef[indexes, k] = y * alpha
                 intercept[k] = neg
                 k += 1

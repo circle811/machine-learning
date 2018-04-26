@@ -2,6 +2,8 @@ import numpy as np
 
 __all__ = ['BernoulliNB', 'MultinomialNB', 'GaussianNB']
 
+TINY = np.finfo(np.float64).tiny
+
 
 class NBBase:
     def __init__(self):
@@ -90,7 +92,8 @@ class GaussianNB(NBBase):
             th = np.mean(Xi, axis=0)
             self.theta_[i] = th
             self.sigma_[i] = np.mean(np.square(Xi - th), axis=0)
-        self.sigma_ += 1e-9 * np.maximum(0.1, np.max(self.sigma_))
+        epsilon = np.maximum(TINY, 1e-9 * np.max(np.var(X, axis=0)))
+        self.sigma_ += epsilon
 
     def decision_function(self, X):
         return (self.class_log_prior_

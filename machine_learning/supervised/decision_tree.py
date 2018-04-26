@@ -2,16 +2,17 @@ import numpy as np
 
 __all__ = ['DecisionTreeClassifier', 'DecisionTreeRegressor']
 
+TINY = np.finfo(np.float64).tiny
+
 
 def gini(c):
-    p = c / np.sum(c, axis=-1)[..., np.newaxis]
+    p = c / np.maximum(TINY, np.sum(c, axis=-1))[..., np.newaxis]
     return 1 - np.sum(np.square(p), axis=-1)
 
 
 def entropy(c):
-    p = c / np.sum(c, axis=-1)[..., np.newaxis]
-    lp = np.zeros_like(p)
-    np.log(p, out=lp, where=p > 0)
+    p = c / np.maximum(TINY, np.sum(c, axis=-1))[..., np.newaxis]
+    lp = np.log(p, out=np.zeros_like(p), where=p > 0)
     return np.sum(-p * lp, axis=-1)
 
 
@@ -124,7 +125,7 @@ class DecisionTreeBase:
         self.min_impurity_decrease = min_impurity_decrease
         self.n_features_ = None
         self.max_features_ = None
-        self.root = None
+        self.root_ = None
         self.feature_importances_ = None
 
     def fit(self, X, Y, weight=None):
@@ -134,7 +135,7 @@ class DecisionTreeBase:
         else:
             weight = weight / np.sum(weight)
         self._compute_max_feature()
-        self.root = self._build_tree(X, Y, weight, np.arange(X.shape[0]), 0)
+        self.root_ = self._build_tree(X, Y, weight, np.arange(X.shape[0]), 0)
         self.feature_importances_ = self._compute_feature_importances()
 
     def predict(self, X):
@@ -186,7 +187,7 @@ class DecisionTreeBase:
         if self.splitter == 'best':
             return self._best_split_fs(X, Y, weight, indexes, range(self.n_features_))
         else:
-            fs = np.random.choice(range(self.n_features_), size=self.max_features_, replace=False)
+            fs = np.random.choice(self.n_features_, size=self.max_features_, replace=False)
             split_feature, split_value, impurity = self._best_split_fs(X, Y, weight, indexes, fs)
             if impurity == np.inf:
                 s = set(fs)
@@ -226,7 +227,7 @@ class DecisionTreeBase:
         return split_value, impurity
 
     def _find_leaf(self, x):
-        p = self.root
+        p = self.root_
         while isinstance(p, Inner):
             if x[p.split_feature] < p.split_value:
                 p = p.left
@@ -240,11 +241,8 @@ class DecisionTreeBase:
                 importances[node.split_feature] += node.sum_weight * node.impurity_decrease
 
         importances = np.zeros(self.n_features_)
-        self.root.walk(f)
-        s = np.sum(importances)
-        if s > 0:
-            importances /= s
-        return importances
+        self.root_.walk(f)
+        return importances / np.maximum(TINY, np.sum(importances))
 
 
 class DecisionTreeClassifier(DecisionTreeBase):

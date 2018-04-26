@@ -4,6 +4,8 @@ from ..utils.kernel import kernel_function
 
 __all__ = ['PCA', 'KernelPCA']
 
+TINY = np.finfo(np.float64).tiny
+
 
 class PCA:
     def __init__(self, n_components=None):
@@ -25,7 +27,7 @@ class PCA:
         u, s, v = np.linalg.svd(Xm, full_matrices=False)
         var = np.square(s) / (n_samples - 1)
         self.explained_variance_ = var[:self.n_components_]
-        self.explained_variance_ratio_ = var[:self.n_components_] / np.sum(var)
+        self.explained_variance_ratio_ = var[:self.n_components_] / np.maximum(TINY, np.sum(var))
         self.components_ = v[:self.n_components_]
 
     def fit_transform(self, X):
