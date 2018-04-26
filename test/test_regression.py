@@ -58,8 +58,16 @@ class_params_list = [
     (knn.KNNRegressor, dict(n_neighbors=10, metric='l2_square', algorithm='brute')),
 
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.0)),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.GD())),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.MomentumGD(nesterovs=False))),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.MomentumGD(nesterovs=True))),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.SGD())),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.MomentumSGD(nesterovs=False))),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.MomentumSGD(nesterovs=True))),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.Adam())),
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.5)),
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=1.0)),
+    (linear.LinearRegression, dict(alpha=1.0, l1_ratio=0.0)),
 
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='best', min_impurity_decrease=0.0)),
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='best', min_impurity_decrease=1e-5)),
@@ -74,10 +82,12 @@ class_params_list = [
     (random_forest.RandomForestRegressor, dict(n_estimators=20, max_features='log2')),
     (random_forest.RandomForestRegressor, dict(n_estimators=20, max_features='sqrt')),
 
-    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), optimizer=optimizer.AdamOptimizer())),
-    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), optimizer=optimizer.SGDOptimizer())),
-    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(100, 100), optimizer=optimizer.AdamOptimizer())),
-    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(100, 100), optimizer=optimizer.SGDOptimizer())),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.SGD())),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=False))),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=True))),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.Adam())),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.01)),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(100, 100), alpha=0.001)),
 ]
 
 print('start test')

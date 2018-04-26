@@ -66,16 +66,22 @@ class_params_list = [
     (knn.KNNClassifier, dict(n_neighbors=10, metric='l2_square', algorithm='kd_tree')),
     (knn.KNNClassifier, dict(n_neighbors=10, metric='l2_square', algorithm='brute')),
 
-    (naive_bayes.BernoulliNB, dict(alpha=1.0)),
     (naive_bayes.BernoulliNB, dict(alpha=0.5)),
-    (naive_bayes.MultinomialNB, dict(alpha=1.0)),
+    (naive_bayes.BernoulliNB, dict(alpha=1.0)),
     (naive_bayes.MultinomialNB, dict(alpha=0.5)),
+    (naive_bayes.MultinomialNB, dict(alpha=1.0)),
     (naive_bayes.GaussianNB, dict()),
 
-    (linear.LogisticRegression, dict(alpha=0.0)),
-    (linear.LogisticRegression, dict(alpha=0.0001, l1_ratio=0.0)),
-    (linear.LogisticRegression, dict(alpha=0.0001, l1_ratio=0.5)),
-    (linear.LogisticRegression, dict(alpha=0.0001, l1_ratio=1.0)),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.GD())),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.MomentumGD(nesterovs=False))),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.MomentumGD(nesterovs=True))),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.SGD())),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.MomentumSGD(nesterovs=False))),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.MomentumSGD(nesterovs=True))),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.Adam())),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.5)),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=1.0)),
+    (linear.LogisticRegression, dict(alpha=0.1, l1_ratio=0.0)),
 
     (svm.SVMClassifier, dict(C=1.0, kernel='linear', multi_class='ovr')),
     (svm.SVMClassifier, dict(C=1.0, kernel='linear', multi_class='ovo')),
@@ -104,10 +110,12 @@ class_params_list = [
     (random_forest.RandomForestClassifier, dict(n_estimators=20, max_features='log2')),
     (random_forest.RandomForestClassifier, dict(n_estimators=20, max_features='sqrt')),
 
-    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), optimizer=optimizer.AdamOptimizer())),
-    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), optimizer=optimizer.SGDOptimizer())),
-    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(100, 100), optimizer=optimizer.AdamOptimizer())),
-    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(100, 100), optimizer=optimizer.SGDOptimizer())),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.SGD())),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=False))),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=True))),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.Adam())),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.01)),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(100, 100), alpha=0.001)),
 ]
 
 print('start test')
