@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..algorithm.optimizer import AdamOptimizer
+from ..algorithm.optimizer import SGD, Adam
 
 __all__ = ['NeuralNetworkClassifier', 'NeuralNetworkRegressor']
 
@@ -14,21 +14,20 @@ def to_dict(ws, bs):
 
 
 class NeuralNetworkBase:
-    def __init__(self, hidden_layer_sizes=(100,), alpha=0.0001, optimizer=None, batch_size=200, max_iter=200):
+    def __init__(self, hidden_layer_sizes=(100,), alpha=1e-4, optimizer=None):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.alpha = alpha
         if optimizer is not None:
             self.optimizer = optimizer
         else:
-            self.optimizer = AdamOptimizer()
-        self.batch_size = batch_size
-        self.max_iter = max_iter
+            self.optimizer = Adam()
         self.coefs_ = None
         self.intercepts_ = None
         self.loss_curve_ = None
 
     def fit(self, X, Y):
-        layer_size = X.shape[1:] + self.hidden_layer_sizes + (self._output_size(),)
+        n_samples, n_features = X.shape
+        layer_size = (n_features,) + self.hidden_layer_sizes + (self._output_size(),)
         n_layers = len(layer_size) - 1
         self.coefs_ = []
         self.intercepts_ = []
@@ -37,16 +36,20 @@ class NeuralNetworkBase:
             self.coefs_.append(np.sqrt(2 / n_in) * np.random.randn(n_in, n_out))
             self.intercepts_.append(np.sqrt(2 / n_in) * np.random.randn(n_out))
         parameters = to_dict(self.coefs_, self.intercepts_)
-        self.optimizer.minimize(parameters, self._loss_gradient)
-        self.loss_curve_ = self.optimizer.run(X, Y, self.batch_size, self.max_iter)
+        self.optimizer.minimize(parameters, lambda a=slice(None): self._loss_gradient(X[a], Y[a]))
+        self.loss_curve_ = self.optimizer.run(n_samples=n_samples)
 
     def predict(self, X):
         raise NotImplementedError
 
     def decision_function(self, X):
+        if isinstance(self.optimizer, SGD):
+            batch_size = self.optimizer.batch_size
+        else:
+            batch_size = 200
         n_samples = X.shape[0]
-        return np.vstack([self._forward(X[i: i + self.batch_size])
-                          for i in range(0, n_samples, self.batch_size)])
+        return np.vstack([self._forward(X[i: i + batch_size])
+                          for i in range(0, n_samples, batch_size)])
 
     def _output_size(self):
         raise NotImplementedError
@@ -89,8 +92,8 @@ class NeuralNetworkBase:
 
 
 class NeuralNetworkClassifier(NeuralNetworkBase):
-    def __init__(self, hidden_layer_sizes=(100,), alpha=0.0001, optimizer=None, batch_size=200, max_iter=200):
-        super().__init__(hidden_layer_sizes, alpha, optimizer, batch_size, max_iter)
+    def __init__(self, hidden_layer_sizes=(100,), alpha=1e-4, optimizer=None):
+        super().__init__(hidden_layer_sizes, alpha, optimizer)
         self.classes_ = None
 
     def fit(self, X, Y):
@@ -132,7 +135,7 @@ class NeuralNetworkRegressor(NeuralNetworkBase):
 
     def _loss_gradient_output(self, s, Y):
         n_samples = s.shape[0]
-        d = s[:, 0] - Y
+        d = s - Y[:, np.newaxis]
         loss = 0.5 * np.mean(np.square(d))
-        grad = ((1 / n_samples) * d)[:, np.newaxis]
+        grad = (1 / n_samples) * d
         return loss, grad

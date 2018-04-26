@@ -1,82 +1,126 @@
 import numpy as np
 
-__all__ = ['SGDOptimizer', 'AdamOptimizer']
+__all__ = ['GD', 'MomentumGD', 'SGD', 'MomentumSGD', 'Adam']
 
 
-class SGDBase:
-    def __init__(self):
-        self.parameters = None
-        self.loss_gradient = None
+class OptimizerBase:
+    def __init__(self, **kwargs):
+        assert len(kwargs) == 0
+        self.parameter = None
+        self.function_gradient = None
 
-    def minimize(self, parameters, loss_gradient):
-        self.parameters = parameters
-        self.loss_gradient = loss_gradient
+    def minimize(self, parameter, function_gradient):
+        self.parameter = parameter
+        self.function_gradient = function_gradient
 
-    def run(self, X, Y, batch_size=200, max_iter=200):
-        n_samples = X.shape[0]
-        a = np.arange(n_samples)
-        loss_curve = []
-        best_loss = np.inf
-        count = 0
-        for it in range(max_iter):
-            np.random.shuffle(a)
-            total_loss = 0
-            for i in range(0, n_samples, batch_size):
-                b = a[i:i + batch_size]
-                loss, grad = self.loss_gradient(X[b], Y[b])
-                self.apply_gradient(grad)
-                total_loss += loss * b.shape[0]
-            total_loss /= n_samples
-            loss_curve.append(total_loss)
-            if best_loss > total_loss:
-                best_loss = total_loss
-                count = 0
-            else:
-                count += 1
-            if count > 4:
-                break
-
-        return loss_curve
-
-    def apply_gradient(self, gradients):
+    def run(self, **kwargs):
         raise NotImplementedError
 
 
-class SGDOptimizer(SGDBase):
-    def __init__(self, learning_rate=0.001):
-        super().__init__()
+class GD(OptimizerBase):
+    def __init__(self, learning_rate=1e-3, max_iter=200, tol=1e-4, **kwargs):
+        super().__init__(**kwargs)
         self.learning_rate = learning_rate
+        self.max_iter = max_iter
+        self.tol = tol
 
-    def apply_gradient(self, gradients):
-        for k in self.parameters:
-            self.parameters[k] -= self.learning_rate * gradients[k]
+    def run(self, **kwargs):
+        fs = []
+        for _ in range(self.max_iter):
+            f, g = self.function_gradient()
+            fs.append(f)
+            self.update(g)
+        return np.array(fs)
+
+    def update(self, gradient):
+        for k in self.parameter:
+            self.parameter[k] -= self.learning_rate * gradient[k]
 
 
-class AdamOptimizer(SGDBase):
-    def __init__(self, learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08):
-        super().__init__()
-        self.learning_rate = learning_rate
+class SGD(GD):
+    def __init__(self, learning_rate=1e-3, max_iter=200, tol=1e-4, batch_size=200, **kwargs):
+        super().__init__(learning_rate=learning_rate, max_iter=max_iter, tol=tol, **kwargs)
+        self.batch_size = batch_size
+
+    def run(self, n_samples, **kwargs):
+        batch_size = min(n_samples, self.batch_size)
+        n_batchs = (n_samples + batch_size - 1) // batch_size
+        fs = []
+        for _ in range(self.max_iter):
+            sum_f = 0.0
+            for j in range(n_batchs):
+                np.random.choice(n_samples, size=batch_size, replace=False)
+                f, g = self.function_gradient()
+                sum_f += f
+                self.update(g)
+            fs.append(sum_f / n_batchs)
+        return np.array(fs)
+
+
+class MomentumUpdate(GD):
+    def __init__(self, momentum=0.9, nesterovs=True, **kwargs):
+        super().__init__(**kwargs)
+        self.momentum = momentum
+        self.nesterovs = nesterovs
+        self.m = None
+
+    def minimize(self, parameter, function_gradient):
+        super().minimize(parameter, function_gradient)
+        self.m = {k: np.zeros_like(v) for k, v in parameter.items()}
+
+    def update(self, gradient):
+        if self.nesterovs:
+            for k in self.parameter:
+                self.m[k] = self.momentum * self.m[k] + gradient[k]
+                self.parameter[k] -= self.learning_rate * (gradient[k] + self.m[k])
+        else:
+            for k in self.parameter:
+                self.m[k] = self.momentum * self.m[k] + gradient[k]
+                self.parameter[k] -= self.learning_rate * self.m[k]
+
+
+class AdamUpdate(GD):
+    def __init__(self, beta_1=0.9, beta_2=0.999, epsilon=1e-08, **kwargs):
+        super().__init__(**kwargs)
         self.beta_1 = beta_1
         self.beta_2 = beta_2
         self.epsilon = epsilon
         self.t = None
-        self.ms = None
-        self.vs = None
+        self.m = None
+        self.v = None
 
-    def minimize(self, parameters, loss_gradient):
-        super().minimize(parameters, loss_gradient)
+    def minimize(self, parameter, function_gradient):
+        super().minimize(parameter, function_gradient)
         self.t = 0
-        self.ms = {k: np.zeros_like(v) for k, v in parameters.items()}
-        self.vs = {k: np.zeros_like(v) for k, v in parameters.items()}
+        self.m = {k: np.zeros_like(v) for k, v in parameter.items()}
+        self.v = {k: np.zeros_like(v) for k, v in parameter.items()}
 
-    def apply_gradient(self, gradients):
+    def update(self, gradient):
         self.t += 1
-        for k in self.parameters:
-            self.update(self.parameters[k], gradients[k], self.ms[k], self.vs[k])
+        for k in self.parameter:
+            self.m[k] = self.beta_1 * self.m[k] + (1 - self.beta_1) * gradient[k]
+            self.v[k] = self.beta_2 * self.v[k] + (1 - self.beta_2) * np.square(gradient[k])
+            mc = self.m[k] / (1 - self.beta_1 ** self.t)
+            vc = self.v[k] / (1 - self.beta_2 ** self.t)
+            self.parameter[k] -= self.learning_rate * (mc / (np.sqrt(vc) + self.epsilon))
 
-    def update(self, p, g, m, v):
-        m = self.beta_1 * m + (1 - self.beta_1) * g
-        v = self.beta_2 * v + (1 - self.beta_2) * np.square(g)
-        mc = m / (1 - self.beta_1 ** self.t)
-        vc = v / (1 - self.beta_2 ** self.t)
-        p -= self.learning_rate * (mc / (np.sqrt(vc) + self.epsilon))
+
+class MomentumGD(MomentumUpdate, GD):
+    def __init__(self, learning_rate=1e-3, max_iter=200, tol=1e-4,
+                 momentum=0.9, nesterovs=True, **kwargs):
+        super().__init__(learning_rate=learning_rate, max_iter=max_iter, tol=tol,
+                         momentum=momentum, nesterovs=nesterovs, **kwargs)
+
+
+class MomentumSGD(MomentumUpdate, SGD):
+    def __init__(self, learning_rate=1e-3, max_iter=200, tol=1e-4, batch_size=200,
+                 momentum=0.9, nesterovs=True, **kwargs):
+        super().__init__(learning_rate=learning_rate, max_iter=max_iter, tol=tol, batch_size=batch_size,
+                         momentum=momentum, nesterovs=nesterovs, **kwargs)
+
+
+class Adam(AdamUpdate, SGD):
+    def __init__(self, learning_rate=1e-3, max_iter=200, tol=1e-4, batch_size=200,
+                 beta_1=0.9, beta_2=0.999, epsilon=1e-08, **kwargs):
+        super().__init__(learning_rate=learning_rate, max_iter=max_iter, tol=tol, batch_size=batch_size,
+                         beta_1=beta_1, beta_2=beta_2, epsilon=epsilon, **kwargs)

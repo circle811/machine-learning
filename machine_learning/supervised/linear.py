@@ -1,32 +1,30 @@
 import numpy as np
 
-from ..algorithm.optimizer import AdamOptimizer
+from ..algorithm.optimizer import Adam
 
 __all__ = ['LogisticRegression', 'LinearRegression']
 
 
 class LinearBase:
-    def __init__(self, alpha=0.0001, l1_ratio=0.0, optimizer=None, batch_size=200, max_iter=200):
+    def __init__(self, alpha=1e-4, l1_ratio=0.0, optimizer=None):
         self.alpha = alpha
         self.l1_ratio = l1_ratio
         if optimizer is not None:
             self.optimizer = optimizer
         else:
-            self.optimizer = AdamOptimizer()
-        self.batch_size = batch_size
-        self.max_iter = max_iter
+            self.optimizer = Adam()
         self.coef_ = None
         self.intercept_ = None
         self.loss_curve_ = None
 
     def fit(self, X, Y):
-        n_features = X.shape[1]
+        n_samples, n_features = X.shape
         n_output = self._output_size()
         self.coef_ = np.zeros((n_features, n_output))
         self.intercept_ = np.zeros(n_output)
         parameters = {'w': self.coef_, 'b': self.intercept_}
-        self.optimizer.minimize(parameters, self._loss_gradient)
-        self.loss_curve_ = self.optimizer.run(X, Y, self.batch_size, self.max_iter)
+        self.optimizer.minimize(parameters, lambda a=slice(None): self._loss_gradient(X[a], Y[a]))
+        self.loss_curve_ = self.optimizer.run(n_samples=n_samples)
 
     def predict(self, X):
         raise NotImplementedError
@@ -55,8 +53,8 @@ class LinearBase:
 
 
 class LogisticRegression(LinearBase):
-    def __init__(self, alpha=0.0001, l1_ratio=0.0, optimizer=None, batch_size=200, max_iter=200):
-        super().__init__(alpha, l1_ratio, optimizer, batch_size, max_iter)
+    def __init__(self, alpha=1e-4, l1_ratio=0.0, optimizer=None):
+        super().__init__(alpha, l1_ratio, optimizer)
         self.classes_ = None
 
     def fit(self, X, Y):
