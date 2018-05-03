@@ -35,8 +35,8 @@ class NeuralNetworkBase:
             n_in, n_out = layer_size[i], layer_size[i + 1]
             self.coefs_.append(np.sqrt(2 / n_in) * np.random.randn(n_in, n_out))
             self.intercepts_.append(np.sqrt(2 / n_in) * np.random.randn(n_out))
-        parameters = to_dict(self.coefs_, self.intercepts_)
-        self.optimizer.minimize(parameters, lambda a=slice(None): self._loss_gradient(X[a], Y[a]))
+        self.optimizer.minimize(to_dict(self.coefs_, self.intercepts_),
+                                lambda a=slice(None): self._loss_gradient(X[a], Y[a]))
         self.loss_curve_ = self.optimizer.run(n_samples=n_samples)
 
     def predict(self, X):

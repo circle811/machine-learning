@@ -21,7 +21,7 @@ def compute_perplexity(d, gamma):
     return np.exp(h), p
 
 
-def binary_search_gamma(d, desired_perplexity, tol, max_iter):
+def binary_search_gamma(d, desired_perplexity, max_iter, tol):
     gamma = 1.0
     gamma_lower = 0.0
     gamma_upper = np.inf
@@ -41,18 +41,18 @@ def binary_search_gamma(d, desired_perplexity, tol, max_iter):
     return gamma, perplexity, p
 
 
-def conditional_probability(X, desired_perplexity, tol, max_iter):
+def conditional_probability(X, desired_perplexity, max_iter, tol):
     n_samples = X.shape[0]
     d = pairwise_l2_distance(X, X, square=True)
     d.flat[::n_samples + 1] = np.inf
     p = np.zeros((n_samples, n_samples))
     for i in range(n_samples):
-        _, _, p[i] = binary_search_gamma(d[i], desired_perplexity, tol, max_iter)
+        _, _, p[i] = binary_search_gamma(d[i], desired_perplexity, max_iter, tol)
     return p
 
 
-def joint_probability(X, desired_perplexity, tol, max_iter):
-    cond_p = conditional_probability(X, desired_perplexity, tol, max_iter)
+def joint_probability(X, desired_perplexity, max_iter, tol):
+    cond_p = conditional_probability(X, desired_perplexity, max_iter, tol)
     c = cond_p + cond_p.T
     sum_c = np.maximum(EPS, np.sum(c))
     p = np.maximum(EPS, c / sum_c)
@@ -93,7 +93,7 @@ class TSNE:
 
     def fit(self, X):
         n_samples, n_features = X.shape
-        p = joint_probability(X, self.perplexity, 1e-4, 100)
+        p = joint_probability(X, self.perplexity, 100, 1e-4)
 
         self.embedding_ = 1e-4 * np.random.randn(n_samples, self.n_components)
 

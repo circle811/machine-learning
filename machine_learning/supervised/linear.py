@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..algorithm.optimizer import Adam
+from ..algorithm.optimizer import LBFGS
 
 __all__ = ['LogisticRegression', 'LinearRegression']
 
@@ -12,7 +12,7 @@ class LinearBase:
         if optimizer is not None:
             self.optimizer = optimizer
         else:
-            self.optimizer = Adam()
+            self.optimizer = LBFGS()
         self.coef_ = None
         self.intercept_ = None
         self.loss_curve_ = None
@@ -22,8 +22,8 @@ class LinearBase:
         n_output = self._output_size()
         self.coef_ = np.zeros((n_features, n_output))
         self.intercept_ = np.zeros(n_output)
-        parameters = {'w': self.coef_, 'b': self.intercept_}
-        self.optimizer.minimize(parameters, lambda a=slice(None): self._loss_gradient(X[a], Y[a]))
+        self.optimizer.minimize({'w': self.coef_, 'b': self.intercept_},
+                                lambda a=slice(None): self._loss_gradient(X[a], Y[a]))
         self.loss_curve_ = self.optimizer.run(n_samples=n_samples)
 
     def predict(self, X):
