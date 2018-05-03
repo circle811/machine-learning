@@ -64,7 +64,7 @@ class NearestNeighbors:
                 return d_neighbor, i_neighbor
             else:
                 for i in range(n_samples):
-                    i_neighbor[i], _ = self._tree.query(X[i], radius, self.metric)
+                    i_neighbor[i], _ = self._tree.query_radius(X[i], radius, self.metric)
                 return i_neighbor
         else:
             d = pairwise_distance_function[self.metric](X, self._fit_X)
