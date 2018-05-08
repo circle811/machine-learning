@@ -7,7 +7,7 @@ __all__ = ['NeuralNetworkClassifier', 'NeuralNetworkRegressor']
 
 def to_dict(ws, bs):
     d = {}
-    for i in range(len(ws)):
+    for i in range(ws.shape[0]):
         d['w{}'.format(i)] = ws[i]
         d['b{}'.format(i)] = bs[i]
     return d
@@ -29,12 +29,12 @@ class NeuralNetworkBase:
         n_samples, n_features = X.shape
         layer_size = (n_features,) + self.hidden_layer_sizes + (self._output_size(),)
         n_layers = len(layer_size) - 1
-        self.coefs_ = []
-        self.intercepts_ = []
+        self.coefs_ = np.zeros(n_layers, dtype=object)
+        self.intercepts_ = np.zeros(n_layers, dtype=object)
         for i in range(n_layers):
             n_in, n_out = layer_size[i], layer_size[i + 1]
-            self.coefs_.append(np.sqrt(2 / n_in) * np.random.randn(n_in, n_out))
-            self.intercepts_.append(np.sqrt(2 / n_in) * np.random.randn(n_out))
+            self.coefs_[i] = np.sqrt(2 / n_in) * np.random.randn(n_in, n_out)
+            self.intercepts_[i] = np.sqrt(2 / n_in) * np.random.randn(n_out)
         self.optimizer.minimize(to_dict(self.coefs_, self.intercepts_),
                                 lambda a=slice(None): self._loss_gradient(X[a], Y[a]))
         self.loss_curve_ = self.optimizer.run(n_samples=n_samples)
@@ -55,7 +55,7 @@ class NeuralNetworkBase:
         raise NotImplementedError
 
     def _forward(self, X):
-        n_layers = len(self.coefs_)
+        n_layers = self.coefs_.shape[0]
         s = X
         for i in range(n_layers - 1):
             s = np.maximum(0, s @ self.coefs_[i] + self.intercepts_[i])
@@ -64,7 +64,7 @@ class NeuralNetworkBase:
 
     def _loss_gradient(self, X, Y):
         # forward pass
-        n_layers = len(self.coefs_)
+        n_layers = self.coefs_.shape[0]
         s = X
         ss = [s]
         for i in range(n_layers - 1):
@@ -76,8 +76,8 @@ class NeuralNetworkBase:
         loss, grad_s = self._loss_gradient_output(s, Y)
         reg_loss = (0.5 * self.alpha) * np.sum([np.sum(np.square(w)) for w in self.coefs_])
 
-        grad_w = [None] * n_layers
-        grad_b = [None] * n_layers
+        grad_w = np.zeros(n_layers, dtype=object)
+        grad_b = np.zeros(n_layers, dtype=object)
         for i in range(n_layers - 1, 0, -1):
             grad_w[i] = ss[i].T @ grad_s + self.alpha * self.coefs_[i]
             grad_b[i] = np.sum(grad_s, axis=0)

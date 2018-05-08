@@ -9,12 +9,12 @@ TINY = np.finfo(np.float64).tiny
 
 
 class AdaBoostClassifier:
-    def __init__(self, base_estimator=None, n_estimators=50):
+    def __init__(self, n_estimators=50, base_estimator=None):
+        self.n_estimators = n_estimators
         if base_estimator is not None:
             self.base_estimator = base_estimator
         else:
             self.base_estimator = DecisionTreeClassifier(max_depth=1)
-        self.n_estimators = n_estimators
         self.estimators_ = None
         self.estimator_errors_ = None
         self.estimator_weights_ = None
@@ -55,7 +55,7 @@ class AdaBoostClassifier:
             weight *= np.exp(incorrect * alpha)
             weight /= np.sum(weight)
 
-        self.estimators_ = estimators
+        self.estimators_ = np.array(estimators)
         self.estimator_errors_ = np.array(estimator_errors)
         self.estimator_weights_ = np.array(estimator_weights)
 

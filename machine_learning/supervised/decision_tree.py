@@ -100,12 +100,13 @@ class Inner:
 
 
 class Leaf:
-    __slots__ = ['sum_weight', 'predict_value', 'predict_proba']
+    __slots__ = ['sum_weight', 'predict_value', 'predict_proba', 'indexes']
 
-    def __init__(self, sum_weight, predict_value, predict_proba=None):
+    def __init__(self, sum_weight, predict_value, predict_proba=None, indexes=None):
         self.sum_weight = sum_weight
         self.predict_value = predict_value
         self.predict_proba = predict_proba
+        self.indexes = indexes
 
     def depth(self):
         return 0
@@ -163,16 +164,16 @@ class DecisionTreeBase:
         sum_weight = np.sum(ws)
 
         if depth >= self.max_depth or indexes.shape[0] <= 1:
-            return self._build_leaf(ys, ws)
+            return self._build_leaf(ys, ws, indexes)
 
         impurity_p = self.impurity_func(ys, ws)
         if impurity_p * sum_weight <= self.min_impurity_decrease:
-            return self._build_leaf(ys, ws)
+            return self._build_leaf(ys, ws, indexes)
 
         split_feature, split_value, impurity = self._best_split(X, Y, weight, indexes)
         impurity_decrease = impurity_p - impurity
         if impurity_decrease * sum_weight < self.min_impurity_decrease:
-            return self._build_leaf(ys, ws)
+            return self._build_leaf(ys, ws, indexes)
 
         on_left = X[indexes, split_feature] < split_value
         left = self._build_tree(X, Y, weight, indexes[on_left], depth + 1)
@@ -180,7 +181,7 @@ class DecisionTreeBase:
 
         return Inner(sum_weight, impurity_decrease, split_feature, split_value, left, right)
 
-    def _build_leaf(self, Y, weight):
+    def _build_leaf(self, ys, ws, indexes):
         raise NotImplementedError
 
     def _best_split(self, X, Y, weight, indexes):
@@ -262,9 +263,9 @@ class DecisionTreeClassifier(DecisionTreeBase):
     def predict_proba(self, X):
         return np.stack([self._find_leaf(X[i]).predict_proba for i in range(X.shape[0])])
 
-    def _build_leaf(self, Y, weight):
-        c = count(Y, weight, self.classes_.shape[0])
-        return Leaf(np.sum(weight), np.argmax(c), c / np.sum(c))
+    def _build_leaf(self, ys, ws, indexes):
+        c = count(ys, ws, self.classes_.shape[0])
+        return Leaf(np.sum(ws), np.argmax(c), predict_proba=c / np.sum(c))
 
 
 class DecisionTreeRegressor(DecisionTreeBase):
@@ -275,6 +276,6 @@ class DecisionTreeRegressor(DecisionTreeBase):
     def predict(self, X):
         return np.array([self._find_leaf(X[i]).predict_value for i in range(X.shape[0])])
 
-    def _build_leaf(self, Y, weight):
-        sum_weight = np.sum(weight)
-        return Leaf(sum_weight, np.sum(Y * weight) / sum_weight)
+    def _build_leaf(self, ys, ws, indexes):
+        sum_weight = np.sum(ws)
+        return Leaf(sum_weight, np.sum(ys * ws) / sum_weight, indexes=indexes)

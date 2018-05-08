@@ -62,7 +62,7 @@ class KDTree:
                                      0)
 
     def _build_tree(self, lower, upper, points, split_d):
-        if len(points) <= self.leaf_size:
+        if points.shape[0] <= self.leaf_size:
             return Leaf(lower, upper, points)
 
         r = self._find_split(points, split_d)
@@ -111,7 +111,7 @@ class KDTree:
                 self._search_k(x, k, distance, heap, node.left)
         else:
             d = distance(x, self.X[node.points])
-            for i in range(len(node.points)):
+            for i in range(node.points.shape[0]):
                 if len(heap) < k:
                     heap.push(node.points[i], d[i])
                 elif d[i] < heap.max()[1]:

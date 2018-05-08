@@ -30,7 +30,7 @@ def update(K, Y, alpha, g, i, j, delta):
 
 def compute_b(Y, C, alpha, g):
     js = np.where((alpha > 0) & (alpha < C))[0]
-    if len(js) == 0:
+    if js.shape[0] == 0:
         return 0.0
     else:
         return np.mean(Y[js] - g[js])

@@ -34,7 +34,7 @@ class DisjointSet:
             return True
 
     def get_labels(self):
-        for i in range(len(self.p)):
+        for i in range(self.p.shape[0]):
             self.find(i)
         return self.p
 

@@ -25,14 +25,14 @@ class RandomForestBase:
 
         estimators = []
         for i in range(self.n_estimators):
-            estimator = self.DecisionTree(self.criterion, 'random', self.max_features, self.max_depth,
-                                          self.min_impurity_decrease)
+            estimator = self.DecisionTree(criterion=self.criterion, splitter='random', max_features=self.max_features,
+                                          max_depth=self.max_depth, min_impurity_decrease=self.min_impurity_decrease)
             a = np.random.choice(n_samples, size=n_samples, replace=True)
             a.sort()
             estimator.fit(X[a], Y[a])
             estimators.append(estimator)
 
-        self.estimators_ = estimators
+        self.estimators_ = np.array(estimators)
 
         importances = np.zeros(n_features)
         for estimator in self.estimators_:
