@@ -122,7 +122,13 @@ class GradientBoostingBase:
                 s[:, j] += self.learning_rate * estimators[i, j].predict(X)
 
         self.init_ = init
-        self.estimators_ = np.array(estimators)
+        self.estimators_ = estimators
+
+        importances = np.zeros(n_features)
+        for i in range(self.n_estimators):
+            for j in range(n_output):
+                importances += self.estimators_[i, j].feature_importances_
+        self.feature_importances_ = importances / np.maximum(TINY, np.sum(importances))
 
     def predict(self, X):
         raise NotImplementedError

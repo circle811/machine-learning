@@ -29,8 +29,8 @@ class NeuralNetworkBase:
         n_samples, n_features = X.shape
         layer_size = (n_features,) + self.hidden_layer_sizes + (self._output_size(),)
         n_layers = len(layer_size) - 1
-        self.coefs_ = np.zeros(n_layers, dtype=object)
-        self.intercepts_ = np.zeros(n_layers, dtype=object)
+        self.coefs_ = np.zeros(n_layers, dtype=np.object_)
+        self.intercepts_ = np.zeros(n_layers, dtype=np.object_)
         for i in range(n_layers):
             n_in, n_out = layer_size[i], layer_size[i + 1]
             self.coefs_[i] = np.sqrt(2 / n_in) * np.random.randn(n_in, n_out)
@@ -76,8 +76,8 @@ class NeuralNetworkBase:
         loss, grad_s = self._loss_gradient_output(s, Y)
         reg_loss = (0.5 * self.alpha) * np.sum([np.sum(np.square(w)) for w in self.coefs_])
 
-        grad_w = np.zeros(n_layers, dtype=object)
-        grad_b = np.zeros(n_layers, dtype=object)
+        grad_w = np.zeros(n_layers, dtype=np.object_)
+        grad_b = np.zeros(n_layers, dtype=np.object_)
         for i in range(n_layers - 1, 0, -1):
             grad_w[i] = ss[i].T @ grad_s + self.alpha * self.coefs_[i]
             grad_b[i] = np.sum(grad_s, axis=0)
