@@ -9,7 +9,7 @@ if path not in sys.path:
 
 from machine_learning.algorithm import optimizer
 from machine_learning.supervised import (
-    knn, linear, decision_tree, random_forest, neural_network)
+    knn, linear, decision_tree, gradient_boosting, random_forest, neural_network)
 from machine_learning.utils import load_mnist
 
 x_train, y_train = load_mnist.load_mnist('train')
@@ -44,6 +44,8 @@ def test(class_, params, train_size, test_size):
           .format(ev, r2, mse, t1 - t0, t2 - t1, ))
     print()
 
+    return c
+
 
 class_params_list = [
     (knn.KNNRegressor, dict(n_neighbors=5, metric='l1', algorithm='kd_tree')),
@@ -65,9 +67,13 @@ class_params_list = [
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.MomentumSGD(nesterovs=False))),
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.MomentumSGD(nesterovs=True))),
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.Adam())),
+    (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.1, optimizer=optimizer.LBFGS())),
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=0.5)),
     (linear.LinearRegression, dict(alpha=0.1, l1_ratio=1.0)),
     (linear.LinearRegression, dict(alpha=1.0, l1_ratio=0.0)),
+    (linear.LinearRegression, dict(alpha=1.0, l1_ratio=0.1)),
+    (linear.LinearRegression, dict(alpha=1.0, l1_ratio=0.5)),
+    (linear.LinearRegression, dict(alpha=1.0, l1_ratio=1.0)),
 
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='best', min_impurity_decrease=0.0)),
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='best', min_impurity_decrease=1e-5)),
@@ -76,6 +82,14 @@ class_params_list = [
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='random', max_features='sqrt')),
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='random', max_features=0.2)),
     (decision_tree.DecisionTreeRegressor, dict(criterion='mse', splitter='random', max_features=30)),
+
+    (gradient_boosting.GradientBoostingRegressor, dict(n_estimators=20, learning_rate=0.1, loss='ls')),
+    (gradient_boosting.GradientBoostingRegressor, dict(n_estimators=20, learning_rate=0.2, loss='ls')),
+    (gradient_boosting.GradientBoostingRegressor, dict(n_estimators=40, learning_rate=0.1, loss='ls')),
+    (gradient_boosting.GradientBoostingRegressor, dict(n_estimators=40, learning_rate=0.2, loss='ls')),
+    (gradient_boosting.GradientBoostingRegressor, dict(n_estimators=40, learning_rate=0.2, loss='lad')),
+    (gradient_boosting.GradientBoostingRegressor, dict(n_estimators=40, learning_rate=0.2, loss='huber', alpha=0.8)),
+    (gradient_boosting.GradientBoostingRegressor, dict(n_estimators=40, learning_rate=0.2, loss='huber', alpha=0.9)),
 
     (random_forest.RandomForestRegressor, dict(n_estimators=10, max_features='log2')),
     (random_forest.RandomForestRegressor, dict(n_estimators=10, max_features='sqrt')),
@@ -86,10 +100,13 @@ class_params_list = [
     (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=False))),
     (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=True))),
     (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.Adam())),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.LBFGS())),
     (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(200,), alpha=0.01)),
     (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(100, 100), alpha=0.001)),
+    (neural_network.NeuralNetworkRegressor, dict(hidden_layer_sizes=(100, 100), alpha=0.01)),
 ]
 
 print('start test')
+l = []
 for class_, params in class_params_list:
-    test(class_, params, 800, 1000)
+    l.append(test(class_, params, 800, 1000))

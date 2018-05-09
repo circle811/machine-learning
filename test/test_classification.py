@@ -9,7 +9,7 @@ if path not in sys.path:
 
 from machine_learning.algorithm import optimizer
 from machine_learning.supervised import (
-    knn, naive_bayes, linear, svm, decision_tree, adaboost, random_forest, neural_network)
+    knn, naive_bayes, linear, svm, decision_tree, adaboost, gradient_boosting, random_forest, neural_network)
 from machine_learning.utils import load_mnist
 
 x_train, y_train = load_mnist.load_mnist('train')
@@ -53,6 +53,8 @@ def test(class_, params, train_size, test_size):
               .format(accuracy, t1 - t0, t2 - t1))
     print()
 
+    return c
+
 
 class_params_list = [
     (knn.KNNClassifier, dict(n_neighbors=5, metric='l1', algorithm='kd_tree')),
@@ -79,9 +81,12 @@ class_params_list = [
     (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.MomentumSGD(nesterovs=False))),
     (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.MomentumSGD(nesterovs=True))),
     (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.Adam())),
+    (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.0, optimizer=optimizer.LBFGS())),
     (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=0.5)),
     (linear.LogisticRegression, dict(alpha=0.01, l1_ratio=1.0)),
     (linear.LogisticRegression, dict(alpha=0.1, l1_ratio=0.0)),
+    (linear.LogisticRegression, dict(alpha=0.1, l1_ratio=0.5)),
+    (linear.LogisticRegression, dict(alpha=0.1, l1_ratio=1.0)),
 
     (svm.SVMClassifier, dict(C=1.0, kernel='linear', multi_class='ovr')),
     (svm.SVMClassifier, dict(C=1.0, kernel='linear', multi_class='ovo')),
@@ -91,6 +96,8 @@ class_params_list = [
     (svm.SVMClassifier, dict(C=1.0, kernel='sigmoid', gamma=0.001, multi_class='ovo')),
     (svm.SVMClassifier, dict(C=1.0, kernel='rbf', gamma=0.001, multi_class='ovr')),
     (svm.SVMClassifier, dict(C=1.0, kernel='rbf', gamma=0.001, multi_class='ovo')),
+    (svm.SVMClassifier, dict(C=10.0, kernel='rbf', gamma=0.001, multi_class='ovr')),
+    (svm.SVMClassifier, dict(C=10.0, kernel='rbf', gamma=0.001, multi_class='ovo')),
 
     (decision_tree.DecisionTreeClassifier, dict(criterion='gini', splitter='best', min_impurity_decrease=0.0)),
     (decision_tree.DecisionTreeClassifier, dict(criterion='gini', splitter='best', min_impurity_decrease=1e-5)),
@@ -102,8 +109,15 @@ class_params_list = [
     (decision_tree.DecisionTreeClassifier, dict(criterion='gini', splitter='random', max_features=0.2)),
     (decision_tree.DecisionTreeClassifier, dict(criterion='gini', splitter='random', max_features=30)),
 
-    (adaboost.AdaBoostClassifier, dict(base_estimator=decision_tree.DecisionTreeClassifier(max_depth=1))),
-    (adaboost.AdaBoostClassifier, dict(base_estimator=decision_tree.DecisionTreeClassifier(max_depth=2))),
+    (adaboost.AdaBoostClassifier, dict(n_estimators=50, base_estimator=decision_tree.DecisionTreeClassifier(max_depth=1))),
+    (adaboost.AdaBoostClassifier, dict(n_estimators=50, base_estimator=decision_tree.DecisionTreeClassifier(max_depth=2))),
+    (adaboost.AdaBoostClassifier, dict(n_estimators=100, base_estimator=decision_tree.DecisionTreeClassifier(max_depth=1))),
+    (adaboost.AdaBoostClassifier, dict(n_estimators=100, base_estimator=decision_tree.DecisionTreeClassifier(max_depth=2))),
+
+    (gradient_boosting.GradientBoostingClassifier, dict(n_estimators=20, learning_rate=0.1)),
+    (gradient_boosting.GradientBoostingClassifier, dict(n_estimators=20, learning_rate=0.2)),
+    (gradient_boosting.GradientBoostingClassifier, dict(n_estimators=40, learning_rate=0.1)),
+    (gradient_boosting.GradientBoostingClassifier, dict(n_estimators=40, learning_rate=0.2)),
 
     (random_forest.RandomForestClassifier, dict(n_estimators=10, max_features='log2')),
     (random_forest.RandomForestClassifier, dict(n_estimators=10, max_features='sqrt')),
@@ -114,10 +128,13 @@ class_params_list = [
     (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=False))),
     (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.MomentumSGD(nesterovs=True))),
     (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.Adam())),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.001, optimizer=optimizer.LBFGS())),
     (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(200,), alpha=0.01)),
     (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(100, 100), alpha=0.001)),
+    (neural_network.NeuralNetworkClassifier, dict(hidden_layer_sizes=(100, 100), alpha=0.01)),
 ]
 
 print('start test')
+l = []
 for class_, params in class_params_list:
-    test(class_, params, 800, 1000)
+    l.append(test(class_, params, 800, 1000))
