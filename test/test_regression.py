@@ -10,7 +10,7 @@ if path not in sys.path:
 from machine_learning.algorithm import optimizer
 from machine_learning.supervised import (
     knn, linear, decision_tree, gradient_boosting, random_forest, neural_network)
-from machine_learning.utils import load_mnist
+from machine_learning.utils import load_mnist, metrics
 
 x_train, y_train = load_mnist.load_mnist('train')
 x_test, y_test = load_mnist.load_mnist('test')
@@ -35,9 +35,9 @@ def test(class_, params, train_size, test_size):
 
     # predict
     yp = c.predict(xt)
-    ev = 1 - np.var(yt - yp) / np.var(yt)
-    r2 = 1 - np.sum(np.square(yt - yp)) / np.sum(np.square(yt - np.mean(yt)))
-    mse = np.mean(np.square(yt - yp))
+    ev = metrics.explained_variance_score(yt, yp)
+    r2 = metrics.r2_score(yt, yp)
+    mse = metrics.mean_squared_error(yt, yp)
     t2 = time.time()
 
     print('explained_variance={:.6f}, r2_score={:.6f}, mean_squared_error={:.6f}, fit={:.3f}s, predict={:.3f}s'

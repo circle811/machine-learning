@@ -10,7 +10,7 @@ if path not in sys.path:
 from machine_learning.algorithm import optimizer
 from machine_learning.supervised import (
     knn, naive_bayes, linear, svm, decision_tree, adaboost, gradient_boosting, random_forest, neural_network)
-from machine_learning.utils import load_mnist
+from machine_learning.utils import load_mnist, metrics
 
 x_train, y_train = load_mnist.load_mnist('train')
 x_test, y_test = load_mnist.load_mnist('test')
@@ -35,22 +35,21 @@ def test(class_, params, train_size, test_size):
 
     # predict
     yp = c.predict(xt)
-    accuracy = np.mean(yp == yt)
+    accuracy = metrics.accuracy_score(yt, yp)
+    f1 = metrics.f1_score(yt, yp, average='macro')
     t2 = time.time()
 
     if hasattr(c, 'predict_proba'):
         # predict_proba
-        _, ytt = np.unique(yt, return_inverse=True)
         ypp = c.predict_proba(xt)
-        p = ypp[np.arange(ytt.shape[0]), ytt]
-        logloss = -np.mean(np.log(np.maximum(1e-15, p)))
+        logloss = metrics.log_loss(yt, ypp)
         t3 = time.time()
 
-        print('accuracy={:.4f}, logloss={:.4f}, fit={:.3f}s, predict={:.3f}s, predict_proba={:.3f}s'
-              .format(accuracy, logloss, t1 - t0, t2 - t1, t3 - t2))
+        print('accuracy={:.4f}, f1={:.4f}, logloss={:.4f}, fit={:.3f}s, predict={:.3f}s, predict_proba={:.3f}s'
+              .format(accuracy, f1, logloss, t1 - t0, t2 - t1, t3 - t2))
     else:
-        print('accuracy={:.4f}, fit={:.3f}s, predict={:.3f}s'
-              .format(accuracy, t1 - t0, t2 - t1))
+        print('accuracy={:.4f}, f1={:.4f}, fit={:.3f}s, predict={:.3f}s'
+              .format(accuracy, f1, t1 - t0, t2 - t1))
     print()
 
     return c
