@@ -13,7 +13,7 @@ def gini(c):
 def entropy(c):
     p = c / np.maximum(TINY, np.sum(c, axis=-1))[..., np.newaxis]
     lp = np.log(p, out=np.zeros_like(p), where=p > 0)
-    return np.sum(-p * lp, axis=-1)
+    return -np.sum(p * lp, axis=-1)
 
 
 def count(Y, weight, n_classes):

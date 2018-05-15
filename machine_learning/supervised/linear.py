@@ -94,7 +94,7 @@ class LogisticRegression(LinearBase):
 
 class LinearRegression(LinearBase):
     def fit(self, X, Y):
-        if self.alpha * self.l1_ratio == 0.0:
+        if self.alpha * self.l1_ratio == 0:
             n_samples, n_features = X.shape
             Xe = np.hstack([X, np.ones((n_samples, 1))])
             w = np.linalg.pinv(Xe.T @ Xe + n_samples * self.alpha * np.eye(n_features + 1)) @ (Xe.T @ Y)
