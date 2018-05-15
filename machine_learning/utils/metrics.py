@@ -100,11 +100,25 @@ def log_loss(y_true, y_pred, eps=1e-15):
 
 # regression
 def explained_variance_score(y_true, y_pred):
-    return 1 - np.var(y_true - y_pred) / np.var(y_true)
+    a = np.var(y_true - y_pred)
+    b = np.var(y_true)
+    if a == 0:
+        return 1.0
+    elif b == 0:
+        return 0.0
+    else:
+        return 1 - a / b
 
 
 def r2_score(y_true, y_pred):
-    return 1 - np.sum(np.square(y_true - y_pred)) / np.sum(np.square(y_true - np.mean(y_true)))
+    a = np.sum(np.square(y_true - y_pred))
+    b = np.sum(np.square(y_true - np.mean(y_true)))
+    if a == 0:
+        return 1.0
+    elif b == 0:
+        return 0.0
+    else:
+        return 1 - a / b
 
 
 def mean_squared_error(y_true, y_pred):
@@ -171,7 +185,10 @@ def adjusted_rand_score(labels_true, labels_pred):
     comb_b = np.sum(b * (b - 1)) // 2
     prod = comb_a * comb_b / n_pairs
     mean = (comb_a + comb_b) / 2
-    return (comb_c - prod) / (mean - prod)
+    if mean - prod == 0:
+        return 1.0
+    else:
+        return (comb_c - prod) / (mean - prod)
 
 
 def fowlkes_mallows_score(labels_true, labels_pred):
@@ -189,34 +206,75 @@ def mutual_info_score(labels_true, labels_pred):
 
 def normalized_mutual_info_score(labels_true, labels_pred):
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
-    return mi / np.sqrt(ha * hb)
+    if ha == hb == 0:
+        return 1.0
+    elif ha == 0 or hb == 0:
+        return 0.0
+    else:
+        return mi / np.sqrt(ha * hb)
 
 
 def homogeneity_score(labels_true, labels_pred):
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
-    h = mi / hb
+
+    if hb == 0:
+        h = 1.0
+    else:
+        h = mi / hb
+
     return h
 
 
 def completeness_score(labels_true, labels_pred):
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
-    c = mi / ha
+
+    if ha == 0:
+        c = 1.0
+    else:
+        c = mi / ha
+
     return c
 
 
 def v_measure_score(labels_true, labels_pred):
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
-    h = mi / hb
-    c = mi / ha
-    v = 2 * h * c / (h + c)
+
+    if hb == 0:
+        h = 1.0
+    else:
+        h = mi / hb
+
+    if ha == 0:
+        c = 1.0
+    else:
+        c = mi / ha
+
+    if h + c == 0:
+        v = 0.0
+    else:
+        v = 2 * h * c / (h + c)
+
     return v
 
 
 def homogeneity_completeness_v_measure(labels_true, labels_pred):
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
-    h = mi / hb
-    c = mi / ha
-    v = 2 * h * c / (h + c)
+
+    if hb == 0:
+        h = 1.0
+    else:
+        h = mi / hb
+
+    if ha == 0:
+        c = 1.0
+    else:
+        c = mi / ha
+
+    if h + c == 0:
+        v = 0.0
+    else:
+        v = 2 * h * c / (h + c)
+
     return h, c, v
 
 
@@ -226,6 +284,8 @@ def silhouette_samples(X, labels, metric='l2'):
     d = pairwise_distance_function[metric](X, X)
     labels_u, labels_i, labels_c = np.unique(labels, return_inverse=True, return_counts=True)
     n_labels = labels_u.shape[0]
+    if n_labels <= 1:
+        raise ValueError('labels')
 
     s = np.zeros(n_samples)
     for i in range(n_samples):
@@ -233,11 +293,11 @@ def silhouette_samples(X, labels, metric='l2'):
         dc = np.zeros((n_samples, n_labels))
         dc[a, labels_i] = d[i]
         dc_sum = np.sum(dc, axis=0)
-        dc_self = dc_sum[li] / max(labels_c[li] - 1, 1)
+        dc_self = dc_sum[li] / max(1, labels_c[li] - 1)
         dc_mean = dc_sum / labels_c
         dc_mean[li] = np.inf
         dc_min = np.min(dc_mean)
-        s[i] = (dc_min - dc_self) / max(dc_self, dc_min)
+        s[i] = (dc_min - dc_self) / max(TINY, dc_self, dc_min)
 
     return s
 
@@ -250,6 +310,9 @@ def calinski_harabaz_score(X, labels):
     n_samples = X.shape[0]
     labels_u, labels_i, labels_c = np.unique(labels, return_inverse=True, return_counts=True)
     n_labels = labels_u.shape[0]
+    if n_labels <= 1:
+        raise ValueError('labels')
+
     center = np.mean(X, axis=0)
     w = 0.0
     b = 0.0
@@ -258,4 +321,8 @@ def calinski_harabaz_score(X, labels):
         center_k = np.mean(Xk, axis=0)
         w += np.sum(l2_distance(Xk, center_k, square=True))
         b += labels_c[k] * l2_distance(center_k, center, square=True)
-    return 1.0 if w == 0 else b * (n_samples - n_labels) / (w * (n_labels - 1))
+
+    if w == 0:
+        return 1.0
+    else:
+        return b * (n_samples - n_labels) / (w * (n_labels - 1))
