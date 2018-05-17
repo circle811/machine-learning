@@ -7,6 +7,9 @@ TINY = np.finfo(np.float64).tiny
 
 class NBBase:
     def __init__(self):
+        """
+        """
+
         self.classes_ = None
         self.class_log_prior_ = None
 
@@ -34,6 +37,11 @@ class NBBase:
 
 class BernoulliNB(NBBase):
     def __init__(self, alpha=1.0):
+        """
+        :param alpha: float (default=1.0)
+            Laplace smoothing parameter.
+        """
+
         super().__init__()
         self.alpha = alpha
         self.feature_log_prob_ = None
@@ -59,6 +67,11 @@ class BernoulliNB(NBBase):
 
 class MultinomialNB(NBBase):
     def __init__(self, alpha=1.0):
+        """
+        :param alpha: float (default=1.0)
+            Laplace smoothing parameter.
+        """
+
         super().__init__()
         self.alpha = alpha
         self.feature_log_prob_ = None
@@ -78,6 +91,9 @@ class MultinomialNB(NBBase):
 
 class GaussianNB(NBBase):
     def __init__(self):
+        """
+        """
+
         super().__init__()
         self.theta_ = None
         self.sigma_ = None

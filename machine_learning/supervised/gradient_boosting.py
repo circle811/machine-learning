@@ -79,6 +79,29 @@ def adjust_tree(predict_value_func, tree, Y):
 class GradientBoostingBase:
     def __init__(self, n_estimators=100, learning_rate=0.1, loss=None, alpha=None, criterion='mse', max_depth=3,
                  min_impurity_decrease=0.0):
+        """
+        :param n_estimators: int (default=100)
+            Maximum number of decision trees.
+
+        :param learning_rate: float (default=0.1)
+            Rate of each decision tree.
+
+        :param loss: string
+            Loss function, "deviance", "ls", "lad" or "huber".
+
+        :param alpha: float or None
+            Alpha quantile of huber loss function. Used when loss == "huber".
+
+        :param criterion: string (default="mse")
+            Impurity criterion, "mse".
+
+        :param max_depth: int or inf (default=3)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.loss = loss
@@ -146,6 +169,26 @@ class GradientBoostingBase:
 class GradientBoostingClassifier(GradientBoostingBase):
     def __init__(self, n_estimators=100, learning_rate=0.1, loss='deviance', criterion='mse', max_depth=3,
                  min_impurity_decrease=0.0):
+        """
+        :param n_estimators: int (default=100)
+            Maximum number of decision trees.
+
+        :param learning_rate: float (default=0.1)
+            Rate of each decision tree.
+
+        :param loss: string (default="deviance")
+            Loss function, "deviance".
+
+        :param criterion: string (default="mse")
+            Impurity criterion, "mse".
+
+        :param max_depth: int or inf (default=3)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         super().__init__(n_estimators, learning_rate, loss, None, criterion, max_depth, min_impurity_decrease)
         self.classes_ = None
 
@@ -170,6 +213,29 @@ class GradientBoostingClassifier(GradientBoostingBase):
 class GradientBoostingRegressor(GradientBoostingBase):
     def __init__(self, n_estimators=100, learning_rate=0.1, loss='ls', alpha=0.9, criterion='mse', max_depth=3,
                  min_impurity_decrease=0.0):
+        """
+        :param n_estimators: int (default=100)
+            Maximum number of decision trees.
+
+        :param learning_rate: float (default=0.1)
+            Rate of each decision tree.
+
+        :param loss: string (default="ls")
+            Loss function, "ls", "lad" or "huber".
+
+        :param alpha: float or None (default=0.9)
+            Alpha quantile of huber loss function. Used when loss == "huber".
+
+        :param criterion: string (default="mse")
+            Impurity criterion, "mse".
+
+        :param max_depth: int or inf (default=3)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         super().__init__(n_estimators, learning_rate, loss, alpha, criterion, max_depth, min_impurity_decrease)
 
     def fit(self, X, Y):

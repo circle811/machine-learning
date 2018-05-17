@@ -15,6 +15,20 @@ def count2d(Y, n_classes):
 
 class KNNBase(NearestNeighbors):
     def __init__(self, n_neighbors=5, metric='l2_square', algorithm='kd_tree', leaf_size=20):
+        """
+        :param n_neighbors: int (default=5)
+            Number of neighbors.
+
+        :param metric: string (default="l2_square")
+            Distance metric, "l1", "l2", "l2_square" or "linf".
+
+        :param algorithm: string (default="kd_tree")
+            Algorithm, "kd_tree" or "brute".
+
+        :param leaf_size: int (default=20)
+            Leaf size of the kd tree. Used when algorithm="kd_tree".
+        """
+
         super().__init__(n_neighbors=n_neighbors, metric=metric, algorithm=algorithm, leaf_size=leaf_size)
         self._Y = None
 
@@ -28,6 +42,20 @@ class KNNBase(NearestNeighbors):
 
 class KNNClassifier(KNNBase):
     def __init__(self, n_neighbors=5, metric='l2_square', algorithm='kd_tree', leaf_size=20):
+        """
+        :param n_neighbors: int (default=5)
+            Number of neighbors.
+
+        :param metric: string (default="l2_square")
+            Distance metric, "l1", "l2", "l2_square" or "linf".
+
+        :param algorithm: string (default="kd_tree")
+            Algorithm, "kd_tree" or "brute".
+
+        :param leaf_size: int (default=20)
+            Leaf size of the kd tree. Used when algorithm="kd_tree".
+        """
+
         super().__init__(n_neighbors, metric, algorithm, leaf_size)
         self.classes_ = None
 

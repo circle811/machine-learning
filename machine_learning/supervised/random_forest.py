@@ -12,6 +12,27 @@ class RandomForestBase:
 
     def __init__(self, n_estimators=10, criterion=None, max_features='sqrt', max_depth=np.inf,
                  min_impurity_decrease=0.0):
+        """
+        :param n_estimators: int (default=10)
+            Maximum number of decision trees.
+
+        :param criterion: string
+            Impurity criterion, "gini", "entropy" or "mse".
+
+        :param max_features: int, float or string (default="sqrt")
+            Maximum number of features used at splitting.
+            - if int,    max_features
+            - if float,  int(max_features * n_features)
+            - if "sqrt", int(sqrt(n_features))
+            - if "log2", int(log2(n_features))
+
+        :param max_depth: int or inf (default=inf)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         self.n_estimators = n_estimators
         self.criterion = criterion
         self.max_features = max_features
@@ -48,6 +69,27 @@ class RandomForestClassifier(RandomForestBase):
 
     def __init__(self, n_estimators=10, criterion='gini', max_features='sqrt', max_depth=np.inf,
                  min_impurity_decrease=0.0):
+        """
+        :param n_estimators: int (default=10)
+            Maximum number of decision trees.
+
+        :param criterion: string (default="gini")
+            Impurity criterion, "gini" or "entropy".
+
+        :param max_features: int, float or string (default="sqrt")
+            Maximum number of features used at splitting.
+            - if int,    max_features
+            - if float,  int(max_features * n_features)
+            - if "sqrt", int(sqrt(n_features))
+            - if "log2", int(log2(n_features))
+
+        :param max_depth: int or inf (default=inf)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         super().__init__(n_estimators, criterion, max_features, max_depth, min_impurity_decrease)
         self.classes_ = None
 
@@ -71,6 +113,27 @@ class RandomForestRegressor(RandomForestBase):
 
     def __init__(self, n_estimators=10, criterion='mse', max_features='sqrt', max_depth=np.inf,
                  min_impurity_decrease=0.0):
+        """
+        :param n_estimators: int (default=10)
+            Maximum number of decision trees.
+
+        :param criterion: string (default="mse")
+            Impurity criterion, "mse".
+
+        :param max_features: int, float or string (default="sqrt")
+            Maximum number of features used at splitting.
+            - if int,    max_features
+            - if float,  int(max_features * n_features)
+            - if "sqrt", int(sqrt(n_features))
+            - if "log2", int(log2(n_features))
+
+        :param max_depth: int or inf (default=inf)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         super().__init__(n_estimators, criterion, max_features, max_depth, min_impurity_decrease)
 
     def predict(self, X):

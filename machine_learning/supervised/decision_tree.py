@@ -117,6 +117,29 @@ class Leaf:
 
 class DecisionTreeBase:
     def __init__(self, criterion=None, splitter='best', max_features=None, max_depth=np.inf, min_impurity_decrease=0.0):
+        """
+        :param criterion: string
+            Impurity criterion, "gini", "entropy" or "mse".
+
+        :param splitter: string (default="best")
+            How many features are used at splitting.
+            - if "best",   all features
+            - if "random", random subset of all features
+
+        :param max_features: int, float, string, or None (default=None)
+            Maximum number of features used at splitting. Used when splitter == "random".
+            - if int,    max_features
+            - if float,  int(max_features * n_features)
+            - if "sqrt", int(sqrt(n_features))
+            - if "log2", int(log2(n_features))
+
+        :param max_depth: int or inf (default=inf)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         self.criterion = criterion
         self.impurity_func = impurity_func_dict[criterion]
         self.impurity_all_split_func = impurity_all_split_func_dict[criterion]
@@ -249,6 +272,29 @@ class DecisionTreeBase:
 class DecisionTreeClassifier(DecisionTreeBase):
     def __init__(self, criterion='gini', splitter='best', max_features=None, max_depth=np.inf,
                  min_impurity_decrease=0.0):
+        """
+        :param criterion: string (default="gini")
+            Impurity criterion, "gini" or "entropy".
+
+        :param splitter: string (default="best")
+            How many features are used at splitting.
+            - if "best",   all features
+            - if "random", random subset of all features
+
+        :param max_features: int, float, string, or None (default=None)
+            Maximum number of features used at splitting. Used when splitter == "random".
+            - if int,    max_features
+            - if float,  int(max_features * n_features)
+            - if "sqrt", int(sqrt(n_features))
+            - if "log2", int(log2(n_features))
+
+        :param max_depth: int or inf (default=inf)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         super().__init__(criterion, splitter, max_features, max_depth, min_impurity_decrease)
         self.classes_ = None
 
@@ -271,6 +317,29 @@ class DecisionTreeClassifier(DecisionTreeBase):
 class DecisionTreeRegressor(DecisionTreeBase):
     def __init__(self, criterion='mse', splitter='best', max_features=None, max_depth=np.inf,
                  min_impurity_decrease=0.0):
+        """
+        :param criterion: string (default="mse")
+            Impurity criterion, "mse".
+
+        :param splitter: string (default="best")
+            How many features are used at splitting.
+            - if "best",   all features
+            - if "random", random subset of all features
+
+        :param max_features: int, float, string, or None (default=None)
+            Maximum number of features used at splitting. Used when splitter == "random".
+            - if int,    max_features
+            - if float,  int(max_features * n_features)
+            - if "sqrt", int(sqrt(n_features))
+            - if "log2", int(log2(n_features))
+
+        :param max_depth: int or inf (default=inf)
+            Maximum depth of the decision tree.
+
+        :param min_impurity_decrease: float (default=0.0)
+            Minimum decrease of impurity required at splitting.
+        """
+
         super().__init__(criterion, splitter, max_features, max_depth, min_impurity_decrease)
 
     def predict(self, X):

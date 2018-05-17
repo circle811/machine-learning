@@ -8,6 +8,23 @@ __all__ = ['NearestNeighbors']
 
 class NearestNeighbors:
     def __init__(self, n_neighbors=5, radius=1.0, metric='l2_square', algorithm='kd_tree', leaf_size=20):
+        """
+        :param n_neighbors: int (default=5)
+            Default number of neighbors used by kneighbors.
+
+        :param radius: float (default=1.0)
+            Default radius used by radius_neighbors method.
+
+        :param metric: string (default="l2_square")
+            Distance metric, "l1", "l2", "l2_square" or "linf".
+
+        :param algorithm: string (default="kd_tree")
+            Algorithm, "kd_tree" or "brute".
+
+        :param leaf_size: int (default=20)
+            Leaf size of the kd tree. Used when algorithm="kd_tree".
+        """
+
         self.n_neighbors = n_neighbors
         self.radius = radius
         self.metric = metric

@@ -55,6 +55,32 @@ def smo(K, Y, C, max_iter, tol):
 
 class SVMClassifier:
     def __init__(self, C=1.0, kernel='rbf', degree=3, gamma=1.0, coef0=1.0, max_iter=1000, tol=1e-4, multi_class='ovr'):
+        """
+        :param C: float (default=1.0)
+            Penalty parameter.
+
+        :param kernel: string (default="rbf")
+            Kernel type, "linear", "polynomial", "sigmoid", "rbf" or "precomputed".
+
+        :param degree: int (default=3)
+            Polynomial degree. Used when kernel == "polynomial".
+
+        :param gamma: float (default=1.0)
+            Kernel coefficient. Used when kernel in ["polynomial", "sigmoid", "rbf"].
+
+        :param coef0: float (default=1.0)
+            Kernel intercept. Used when kernel in ["polynomial", "sigmoid"].
+
+        :param max_iter: int (default=1000)
+            Maximum number of iterations.
+
+        :param tol: float (default=1e-4)
+            Tolerance of loss function.
+
+        :param multi_class: string (defalut="ovr")
+            Multi class scheme, "ovr" or "ovo".
+        """
+
         self.C = C
         self.kernel = kernel
         self.degree = degree

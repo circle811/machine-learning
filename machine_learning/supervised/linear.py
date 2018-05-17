@@ -7,6 +7,18 @@ __all__ = ['LogisticRegression', 'LinearRegression']
 
 class LinearBase:
     def __init__(self, alpha=1e-4, l1_ratio=0.0, optimizer=None):
+        """
+        :param alpha: float (default=1e-4)
+            Regular loss parameter.
+
+        :param l1_ratio: float (default=0.0)
+            Ratio of L1 loss.
+            regular_loss = l1_ratio * l1_loss + (1 - l1_ratio) * l2_loss
+
+        :param optimizer: optimizer object (default=LBFGS())
+            Optimizer to minimize the loss function.
+        """
+
         self.alpha = alpha
         self.l1_ratio = l1_ratio
         if optimizer is not None:
@@ -54,6 +66,18 @@ class LinearBase:
 
 class LogisticRegression(LinearBase):
     def __init__(self, alpha=1e-4, l1_ratio=0.0, optimizer=None):
+        """
+        :param alpha: float (default=1e-4)
+            Regular loss parameter.
+
+        :param l1_ratio: float (default=0.0)
+            Ratio of L1 loss.
+            regular_loss = l1_ratio * l1_loss + (1 - l1_ratio) * l2_loss
+
+        :param optimizer: optimizer object (default=LBFGS())
+            Optimizer to minimize the loss function.
+        """
+
         super().__init__(alpha, l1_ratio, optimizer)
         self.classes_ = None
 

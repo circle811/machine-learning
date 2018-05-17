@@ -15,6 +15,17 @@ def to_dict(ws, bs):
 
 class NeuralNetworkBase:
     def __init__(self, hidden_layer_sizes=(100,), alpha=1e-4, optimizer=None):
+        """
+        :param hidden_layer_sizes: tuple of int (default=(100,))
+            Hidden layer sizes of the neural network.
+
+        :param alpha: float (default=1e-4)
+            Regular loss parameter.
+
+        :param optimizer: optimizer object (default=Adam())
+            Optimizer to minimize the loss function.
+        """
+
         self.hidden_layer_sizes = hidden_layer_sizes
         self.alpha = alpha
         if optimizer is not None:
@@ -93,6 +104,17 @@ class NeuralNetworkBase:
 
 class NeuralNetworkClassifier(NeuralNetworkBase):
     def __init__(self, hidden_layer_sizes=(100,), alpha=1e-4, optimizer=None):
+        """
+        :param hidden_layer_sizes: tuple of int (default=(100,))
+            Hidden layer sizes of the neural network.
+
+        :param alpha: float (default=1e-4)
+            Regular loss parameter.
+
+        :param optimizer: optimizer object (default=Adam())
+            Optimizer to minimize the loss function.
+        """
+
         super().__init__(hidden_layer_sizes, alpha, optimizer)
         self.classes_ = None
 

@@ -10,6 +10,14 @@ TINY = np.finfo(np.float64).tiny
 
 class AdaBoostClassifier:
     def __init__(self, n_estimators=50, base_estimator=None):
+        """
+        :param n_estimators: int (default=50)
+            Maximum number of estimators.
+
+        :param base_estimator: classifier object (default=DecisionTreeClassifier(max_depth=1))
+            Base estimator for boosting.
+        """
+
         self.n_estimators = n_estimators
         if base_estimator is not None:
             self.base_estimator = base_estimator
