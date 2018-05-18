@@ -8,6 +8,23 @@ __all__ = ['DBSCAN']
 
 class DBSCAN():
     def __init__(self, eps=0.5, min_samples=5, metric='l2', algorithm='kd_tree', leaf_size=20):
+        """
+        :param eps: float (default=0.5)
+            Maximum distance between neighbors.
+
+        :param min_samples: int (default=5)
+            Minimum number of neighbors required as a core point.
+
+        :param metric: string (default="l2")
+            Distance metric, "l1", "l2", "l2_square" or "linf".
+
+        :param algorithm: string (default="kd_tree")
+            Algorithm, "kd_tree" or "brute".
+
+        :param leaf_size: int (default=20)
+            Leaf size of the kd tree. Used when algorithm="kd_tree".
+        """
+
         self.eps = eps
         self.min_samples = min_samples
         self.metric = metric

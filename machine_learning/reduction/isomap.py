@@ -9,6 +9,22 @@ __all__ = ['Isomap']
 
 class Isomap:
     def __init__(self, n_components=2, n_neighbors=5, algorithm='kd_tree', leaf_size=20):
+        """
+        :param n_components: int or None (default=2)
+            Number of Components.
+            - if int,  n_components
+            - if None, rank of kernel matrix
+
+        :param n_neighbors: int (default=5)
+            Number of neighbors.
+
+        :param algorithm: string (default="kd_tree")
+            Algorithm, "kd_tree" or "brute".
+
+        :param leaf_size: int (default=20)
+            Leaf size of the kd tree. Used when algorithm="kd_tree".
+        """
+
         self.n_components = n_components
         self.n_neighbors = n_neighbors
         self.algorithm = algorithm

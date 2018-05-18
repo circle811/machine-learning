@@ -7,6 +7,20 @@ __all__ = ['KMeans']
 
 class KMeans:
     def __init__(self, n_clusters=8, n_init=10, max_iter=300, tol=1e-4):
+        """
+        :param n_clusters: int (default=8)
+            Number of clusters.
+
+        :param n_init: int (default=10)
+            Number of initial centers.
+
+        :param max_iter: int (default=300)
+            Maximum number of iterations.
+
+        :param tol: float (default=1e-4)
+            Tolerance of loss function.
+        """
+
         self.n_clusters = n_clusters
         self.n_init = n_init
         self.max_iter = max_iter

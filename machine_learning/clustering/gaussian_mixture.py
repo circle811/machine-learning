@@ -22,6 +22,23 @@ def log_proba(weights, means, precisions, X):
 
 class GaussianMixture:
     def __init__(self, n_components=1, n_init=1, max_iter=100, tol=1e-4, reg_covar=1e-6):
+        """
+        :param n_components: int (default=1)
+            Number of Components.
+
+        :param n_init: int (default=1)
+            Number of initial centers.
+
+        :param max_iter: int (default=100)
+            Maximum number of iterations.
+
+        :param tol: float (default=1e-4)
+            Tolerance of loss function.
+
+        :param reg_covar: float (default=1e-6)
+            Regularization of covariance.
+        """
+
         self.n_components = n_components
         self.n_init = n_init
         self.max_iter = max_iter

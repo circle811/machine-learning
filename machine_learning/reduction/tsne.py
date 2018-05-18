@@ -83,6 +83,20 @@ def loss_gradient(p, Y):
 
 class TSNE:
     def __init__(self, n_components=2, perplexity=30.0, learning_rate=200.0, max_iter=1000):
+        """
+        :param n_components: int (default=2)
+            Number of Components.
+
+        :param perplexity: float (default=30.0)
+             Perplexity used to compute gamma of the gaussian distribution.
+
+        :param learning_rate: float (default=200.0)
+            Learning rate of the gradient descent.
+
+        :param max_iter: int (default=1000)
+            Maximum number of iterations.
+        """
+
         self.n_components = n_components
         self.perplexity = perplexity
         self.learning_rate = learning_rate

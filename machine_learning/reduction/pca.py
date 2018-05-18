@@ -9,6 +9,13 @@ TINY = np.finfo(np.float64).tiny
 
 class PCA:
     def __init__(self, n_components=None):
+        """
+        :param n_components: int or None (default=None)
+            Number of Components.
+            - if int,  n_components
+            - if None, min(n_samples, n_features)
+        """
+
         self.n_components = n_components
         self.n_components_ = None
         self.mean_ = None
@@ -44,6 +51,31 @@ class PCA:
 class KernelPCA:
     def __init__(self, n_components=None, kernel='rbf', degree=3, gamma=1.0, coef0=1.0,
                  fit_inverse_transform=False, alpha=1.0):
+        """
+        :param n_components: int or None (default=None)
+            Number of Components.
+            - if int,  n_components
+            - if None, rank of kernel matrix
+
+        :param kernel: string (default="rbf")
+            Kernel type, "linear", "polynomial", "sigmoid", "rbf" or "precomputed".
+
+        :param degree: int (default=3)
+            Polynomial degree. Used when kernel == "polynomial".
+
+        :param gamma: float (default=1.0)
+            Kernel coefficient. Used when kernel in ["polynomial", "sigmoid", "rbf"].
+
+        :param coef0: float (default=1.0)
+            Kernel intercept. Used when kernel in ["polynomial", "sigmoid"].
+
+        :param fit_inverse_transform: bool (default=False)
+            Whether fit inverse transform.
+
+        :param alpha: float (default=1.0)
+            Regular loss parameter of the ridge regression. Used when fit_inverse_transform == True.
+        """
+
         self.n_components = n_components
         self.kernel = kernel
         self.degree = degree

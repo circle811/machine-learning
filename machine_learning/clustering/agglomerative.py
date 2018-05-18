@@ -8,6 +8,17 @@ __all__ = ['AgglomerativeClustering']
 
 class AgglomerativeClustering:
     def __init__(self, n_clusters=2, linkage='ward', affinity='l2'):
+        """
+        :param n_clusters: int (default=2)
+            Number of clusters.
+
+        :param linkage: string (default="ward")
+            Linkage type, "ward", "single", "complete" or "average".
+
+        :param affinity: string (default="l2")
+            Distance metric, "l1", "l2", "l2_square" or "linf".
+        """
+
         self.n_clusters = n_clusters
         self.linkage = linkage
         self.affinity = affinity
