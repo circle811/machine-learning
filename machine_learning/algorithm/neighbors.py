@@ -10,7 +10,7 @@ class NearestNeighbors:
     def __init__(self, n_neighbors=5, radius=1.0, metric='l2_square', algorithm='kd_tree', leaf_size=20):
         """
         :param n_neighbors: int (default=5)
-            Default number of neighbors used by kneighbors.
+            Default number of neighbors used by kneighbors method.
 
         :param radius: float (default=1.0)
             Default radius used by radius_neighbors method.
@@ -41,6 +41,23 @@ class NearestNeighbors:
             raise ValueError('algorithm')
 
     def kneighbors(self, X=None, n_neighbors=None, return_distance=True):
+        """
+        Find k nearest neighbors.
+
+        :param X: array of float (n_samples * n_features) (default=self._fit_X)
+            Center points.
+
+        :param n_neighbors: int (default=self.n_neighbors)
+            Number of neighbors.
+
+        :param return_distance: bool (default=True)
+            Whether return distance.
+
+        :return: array of float (n_samples * n_neighbors), array of int (n_samples * n_neighbors)
+            - if return_distance == True, distances and indexes of the points
+            - else,                       indexes of the points
+        """
+
         if X is None:
             X = self._fit_X
         if n_neighbors is None:
@@ -67,6 +84,23 @@ class NearestNeighbors:
                 return i_neighbor
 
     def radius_neighbors(self, X=None, radius=None, return_distance=True):
+        """
+        Find neighbors where the distance between them to x less than of equal to radius.
+
+        :param X: array of float (n_samples * n_features) (default=self._fit_X)
+            Center points.
+
+        :param radius: float (default=self.radius)
+            Radius.
+
+        :param return_distance: bool (default=True)
+            Whether return distance.
+
+        :return: array of array of float, array of array of int,
+            - if return_distance == True, distances and indexes of the points
+            - else,                       indexes of the points
+        """
+
         if X is None:
             X = self._fit_X
         if radius is None:
@@ -98,6 +132,22 @@ class NearestNeighbors:
                 return i_neighbor
 
     def kneighbors_graph(self, X=None, n_neighbors=None, mode='connectivity'):
+        """
+        Graph which connects points to their k nearest neighbors.
+
+        :param X: array of float (n_samples * n_features) (default=self._fit_X)
+            Center points.
+
+        :param n_neighbors: int (default=self.n_neighbors)
+            Number of neighbors.
+
+        :param mode: string (defalut="connectivity")
+            Graph mode, "connectivity" or "distance".
+
+        :return: array of float (n_samples * n_samples)
+            Adjacency matrix.
+        """
+
         n = self._fit_X.shape[0]
         m = n if X is None else X.shape[0]
         graph = np.zeros((m, n))
@@ -112,6 +162,22 @@ class NearestNeighbors:
         return graph
 
     def radius_neighbors_graph(self, X=None, radius=None, mode='connectivity'):
+        """
+        Graph which connects points if the distance between them less than of equal to radius.
+
+        :param X: array of float (n_samples * n_features) (default=self._fit_X)
+            Center points.
+
+        :param radius: float (default=self.radius)
+            Radius.
+
+        :param mode: string (defalut="connectivity")
+            Graph mode, "connectivity" or "distance".
+
+        :return: array of float (n_samples * n_samples)
+            Adjacency matrix.
+        """
+
         n = self._fit_X.shape[0]
         m = n if X is None else X.shape[0]
         graph = np.zeros((m, n))

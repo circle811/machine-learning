@@ -53,6 +53,14 @@ class Leaf:
 
 class KDTree:
     def __init__(self, X, leaf_size=20):
+        """
+        :param X: array of float (n_samples * n_features)
+            Data points of the kd tree.
+
+        :param leaf_size: int (default=20)
+            Leaf size of the kd tree.
+        """
+
         n, kd = X.shape
         self.X = X
         self.leaf_size = leaf_size
@@ -93,6 +101,22 @@ class KDTree:
                 return c_split_d, split_v, mask
 
     def query(self, x, k, metric='l2_square'):
+        """
+        Find k nearest neighbors.
+
+        :param x: array of float (n_features)
+            Center point.
+
+        :param k: int
+            Number of neighbors.
+
+        :param metric: string (default="l2_square")
+            Distance metric, "l1", "l2", "l2_square" or "linf".
+
+        :return: array of int (k), array of float (k)
+            Indexes and distances of the points.
+        """
+
         heap = Heap()
         self._search_k(x, k, distance_function[metric], heap, self.root)
         l = heap.items()
@@ -119,6 +143,22 @@ class KDTree:
                     heap.push(node.points[i], d[i])
 
     def query_radius(self, x, r, metric='l2_square'):
+        """
+        Find neighbors where the distance between them to x less than of equal to r.
+
+        :param x: array of float (n_features)
+            Center point.
+
+        :param r: float
+            Radius.
+
+        :param metric: string (default="l2_square")
+            Distance metric, "l1", "l2", "l2_square" or "linf".
+
+        :return: array of int (k), array of float (k)
+            Indexes and distances of the points. Where k is the number of neighbors.
+        """
+
         l = []
         self._search_r(x, r, distance_function[metric], l, self.root)
         i = np.concatenate([it[0] for it in l])

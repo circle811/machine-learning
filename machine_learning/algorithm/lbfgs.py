@@ -10,6 +10,10 @@ C2 = 0.9
 
 
 def binary_search_wolfe(function_gradient, x, f, d, g_d, max_iter):
+    """
+    Linear search, use binary search and wolfe condition.
+    """
+
     t = 1.0
     lower = 0.0
     upper = np.inf
@@ -32,6 +36,10 @@ def binary_search_wolfe(function_gradient, x, f, d, g_d, max_iter):
 
 
 def compute_d(dx_list, dg_list, rho_list, g):
+    """
+    Compute search direction.
+    """
+
     m = len(dx_list)
     alpha = np.zeros(m)
     d = -g
@@ -45,6 +53,34 @@ def compute_d(dx_list, dg_list, rho_list, g):
 
 
 def minimize_lbfgs(function_gradient, x0, m=20, max_iter=200, bs_max_iter=20, tol=1e-4, g_tol=1e-4):
+    """
+    L-BFGS Algorithm.
+
+    :param function_gradient: function (array of float (d) -> float, array of float (d))
+        Computer function value and gradient.
+
+    :param x0: array of float (d)
+        Initial point.
+
+    :param m: int (default=20)
+        Number of points and their gradient saved.
+
+    :param max_iter: int (default=200)
+        Maximum number of iterations.
+
+    :param bs_max_iter: int (default=20)
+        Maximum number of iterations of the linear search.
+
+    :param tol: float (default=1e-4)
+        Tolerance of function value.
+
+    :param g_tol: float (default=1e-4)
+        Tolerance of gradient.
+
+    :return: array of float (d), array of float (n_iters)
+        Minimum point, and function values of searched points.
+    """
+
     dx_list = collections.deque()
     dg_list = collections.deque()
     rho_list = collections.deque()
