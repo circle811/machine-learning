@@ -9,6 +9,16 @@ path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../datasets/m
 
 
 def load_mnist(name='train'):
+    """
+    Load minist dataset.
+
+    :param name: string (default="train")
+        Dataset name, "train" or "test"
+
+    :return: array of float (n_samples * n_features), array of int (n_samples),
+        Images and labels.
+    """
+
     if name == 'train':
         images_name = 'train-images-idx3-ubyte.gz'
         labels_name = 'train-labels-idx1-ubyte.gz'

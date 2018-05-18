@@ -6,10 +6,39 @@ __all__ = ['l1_distance', 'l2_distance', 'linf_distance',
 
 
 def l1_distance(x, y):
+    """
+    L1 distance.
+
+    :param x: array of float (... * n_features)
+        Points.
+
+    :param y: array of float (... * n_features)
+        Points.
+
+    :return: array of float (...)
+        L1 distance related to x and y.
+    """
+
     return np.sum(np.abs(x - y), axis=-1)
 
 
 def l2_distance(x, y, square=False):
+    """
+    L2 distance.
+
+    :param x: array of float (... * n_features)
+        Points.
+
+    :param y: array of float (... * n_features)
+        Points.
+
+    :param square: bool (default=False)
+        Whether return squared distance.
+
+    :return: array of float (...)
+        L2 distance (squared L2 distance) related to x and y.
+    """
+
     if square:
         return np.sum(np.square(x - y), axis=-1)
     else:
@@ -17,10 +46,36 @@ def l2_distance(x, y, square=False):
 
 
 def linf_distance(x, y):
+    """
+    L infinity distance.
+
+    :param x: array of float (... * n_features)
+        Points.
+
+    :param y: array of float (... * n_features)
+        Points.
+
+    :return: array of float (...)
+        L infinity distance related to x and y.
+    """
+
     return np.max(np.abs(x - y), axis=-1)
 
 
 def pairwise_l1_distance(X, Y):
+    """
+    Pairwise L1 distance.
+
+    :param X: array of float (m * n_features)
+        Points.
+
+    :param Y: array of float (n * n_features)
+        Points.
+
+    :return: array of float (m * n)
+        L1 distance matrix.
+    """
+
     m = X.shape[0]
     n = Y.shape[0]
     d = np.zeros((m, n))
@@ -30,6 +85,22 @@ def pairwise_l1_distance(X, Y):
 
 
 def pairwise_l2_distance(X, Y, square=False):
+    """
+    Pairwise L2 distance.
+
+    :param X: array of float (m * n_features)
+        Points.
+
+    :param Y: array of float (n * n_features)
+        Points.
+
+    :param square: bool (default=False)
+        Whether return squared distance.
+
+    :return: array of float (m * n)
+        L2 distance (squared L2 distance) matrix.
+    """
+
     d2 = np.sum(np.square(X), axis=1)[:, np.newaxis] + np.sum(np.square(Y), axis=1) - 2 * (X @ Y.T)
     d2 = np.maximum(0, d2)
     if square:
@@ -39,6 +110,19 @@ def pairwise_l2_distance(X, Y, square=False):
 
 
 def pairwise_linf_distance(X, Y):
+    """
+    Pairwise L infinity distance.
+
+    :param X: array of float (m * n_features)
+        Points.
+
+    :param Y: array of float (n * n_features)
+        Points.
+
+    :return: array of float (m * n)
+        L infinity distance matrix.
+    """
+
     m = X.shape[0]
     n = Y.shape[0]
     d = np.zeros((m, n))

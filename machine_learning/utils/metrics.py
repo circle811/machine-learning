@@ -15,6 +15,19 @@ TINY = np.finfo(np.float64).tiny
 
 
 def confusion_matrix(y_true, y_pred):
+    """
+    Confusion matrix.
+
+    :param y_true: array of object (n_samples)
+        True labels.
+
+    :param y_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: array of int (n_samples * n_samples)
+        Confusion matrix, c[i, j] is the number of k where y_true[k] == i and y_pred[k] == j.
+    """
+
     n_samples = y_true.shape[0]
     classes, yi = np.unique(np.concatenate([y_true, y_pred]), return_inverse=True)
     n_classes = classes.shape[0]
@@ -24,10 +37,43 @@ def confusion_matrix(y_true, y_pred):
 
 
 def accuracy_score(y_true, y_pred):
+    """
+    Accuracy score.
+
+    :param y_true: array of object (n_samples)
+        True labels.
+
+    :param y_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Accuracy score.
+    """
+    
     return np.mean(y_true == y_pred)
 
 
 def precision_score(y_true, y_pred, average='binary'):
+    """
+    Precision score.
+
+    :param y_true: array of object (n_samples)
+        True labels.
+
+    :param y_pred: array of object (n_samples)
+        Predicted labels.
+
+    :param average: string or None (default="binary")
+        Avergae method, "binary", "micro", "macro" or None.
+
+    :return: float or array of float (n_samples)
+        Precision score.
+        - if average == "binary", score of the positive class
+        - if average == "micro",  average score
+        - if average == "macro",  accuracy
+        - if average == None,     score array
+    """
+
     c = confusion_matrix(y_true, y_pred)
     p = c.diagonal() / np.maximum(1, c.sum(axis=0))
     if average is None:
@@ -43,6 +89,26 @@ def precision_score(y_true, y_pred, average='binary'):
 
 
 def recall_score(y_true, y_pred, average='binary'):
+    """
+    Recall score.
+
+    :param y_true: array of object (n_samples)
+        True labels.
+
+    :param y_pred: array of object (n_samples)
+        Predicted labels.
+
+    :param average: string or None (default="binary")
+        Avergae method, "binary", "micro", "macro" or None.
+
+    :return: float or array of float (n_samples)
+        Recall score.
+        - if average == "binary", score of the positive class
+        - if average == "micro",  average score
+        - if average == "macro",  accuracy
+        - if average == None,     score array
+    """
+
     c = confusion_matrix(y_true, y_pred)
     r = c.diagonal() / np.maximum(1, c.sum(axis=1))
     if average is None:
@@ -58,6 +124,26 @@ def recall_score(y_true, y_pred, average='binary'):
 
 
 def f1_score(y_true, y_pred, average='binary'):
+    """
+    F1 score, harmonic mean of precision and recall.
+
+    :param y_true: array of object (n_samples)
+        True labels.
+
+    :param y_pred: array of object (n_samples)
+        Predicted labels.
+
+    :param average: string or None (default="binary")
+        Avergae method, "binary", "micro", "macro" or None.
+
+    :return: float or array of float (n_samples)
+        F1 score.
+        - if average == "binary", score of the positive class
+        - if average == "micro",  average score
+        - if average == "macro",  accuracy
+        - if average == None,     score array
+    """
+
     c = confusion_matrix(y_true, y_pred)
     p = c.diagonal() / np.maximum(1, c.sum(axis=0))
     r = c.diagonal() / np.maximum(1, c.sum(axis=1))
@@ -75,6 +161,29 @@ def f1_score(y_true, y_pred, average='binary'):
 
 
 def fbeta_score(y_true, y_pred, beta, average='binary'):
+    """
+    F-beta score, weighted harmonic mean of precision and recall.
+
+    :param y_true: array of object (n_samples)
+        True labels.
+
+    :param y_pred: array of object (n_samples)
+        Predicted labels.
+
+    :param beta: float
+        Weight of precision.
+
+    :param average: string or None (default="binary")
+        Avergae method, "binary", "micro", "macro" or None.
+
+    :return: float or array of float (n_samples)
+        F-beta score.
+        - if average == "binary", score of the positive class
+        - if average == "micro",  average score
+        - if average == "macro",  accuracy
+        - if average == None,     score array
+    """
+
     c = confusion_matrix(y_true, y_pred)
     p = c.diagonal() / np.maximum(1, c.sum(axis=0))
     r = c.diagonal() / np.maximum(1, c.sum(axis=1))
@@ -92,6 +201,22 @@ def fbeta_score(y_true, y_pred, beta, average='binary'):
 
 
 def log_loss(y_true, y_pred, eps=1e-15):
+    """
+    Negative log-likelihood.
+
+    :param y_true: array of object (n_samples)
+        True labels.
+
+    :param y_pred: array of float (n_samples, n_classes)
+        Predicted probabilities.
+
+    :param eps: float (default=1e-15)
+        Used to avoid log(0).
+
+    :return: float
+        Negative log-likelihood.
+    """
+
     n_samples = y_true.shape[0]
     _, yi = np.unique(y_true, return_inverse=True)
     p = y_pred[np.arange(n_samples), yi]
@@ -100,6 +225,19 @@ def log_loss(y_true, y_pred, eps=1e-15):
 
 # regression
 def explained_variance_score(y_true, y_pred):
+    """
+    Explained variance.
+
+    :param y_true: array of float (n_samples)
+        True values.
+
+    :param y_pred: array of float (n_samples)
+        Predicted values.
+
+    :return: float
+        Explained variance.
+    """
+
     a = np.var(y_true - y_pred)
     b = np.var(y_true)
     if a == 0:
@@ -111,6 +249,19 @@ def explained_variance_score(y_true, y_pred):
 
 
 def r2_score(y_true, y_pred):
+    """
+    R2 score.
+
+    :param y_true: array of float (n_samples)
+        True values.
+
+    :param y_pred: array of float (n_samples)
+        Predicted values.
+
+    :return: float
+        R2 score.
+    """
+
     a = np.sum(np.square(y_true - y_pred))
     b = np.sum(np.square(y_true - np.mean(y_true)))
     if a == 0:
@@ -122,19 +273,71 @@ def r2_score(y_true, y_pred):
 
 
 def mean_squared_error(y_true, y_pred):
+    """
+    Mean squared error.
+
+    :param y_true: array of float (n_samples)
+        True values.
+
+    :param y_pred: array of float (n_samples)
+        Predicted values.
+
+    :return: float
+        Mean squared error.
+    """
+
     return np.mean(np.square(y_true - y_pred))
 
 
 def mean_absolute_error(y_true, y_pred):
+    """
+    Mean absolute error.
+
+    :param y_true: array of float (n_samples)
+        True values.
+
+    :param y_pred: array of float (n_samples)
+        Predicted values.
+
+    :return: float
+        Mean absolute error.
+    """
+
     return np.mean(np.abs(y_true - y_pred))
 
 
 def median_absolute_error(y_true, y_pred):
+    """
+    Median absolute error.
+
+    :param y_true: array of float (n_samples)
+        True values.
+
+    :param y_pred: array of float (n_samples)
+        Predicted values.
+
+    :return: float
+        Median absolute error.
+    """
+
     return np.median(np.abs(y_true - y_pred))
 
 
 # clustering
 def contingency_matrix(labels_true, labels_pred):
+    """
+    Contingency matrix.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: array of int (n_labels_true * n_labels_pred)
+        Contingency matrix, c[i, j] is the number of k where labels_true[k] == i and labels_pred[k] == j.
+    """
+
     classes_true, i_true = np.unique(labels_true, return_inverse=True)
     classes_pred, i_pred = np.unique(labels_pred, return_inverse=True)
     n_true = classes_true.shape[0]
@@ -143,6 +346,22 @@ def contingency_matrix(labels_true, labels_pred):
 
 
 def pairwise_count(labels_true, labels_pred):
+    """
+    Pairwise count.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: int, int, int, int
+        Number of pairs (i, j) where labels_true[i] == labels_true[i] and labels_pred[i] == labels_pred[i],
+        Number of pairs (i, j) where labels_true[i] == labels_true[i] and labels_pred[i] != labels_pred[i],
+        Number of pairs (i, j) where labels_true[i] != labels_true[i] and labels_pred[i] == labels_pred[i],
+        Number of pairs (i, j) where labels_true[i] != labels_true[i] and labels_pred[i] != labels_pred[i].
+    """
+
     n_samples = labels_true.shape[0]
     n_pairs = n_samples * (n_samples - 1) // 2
     c = contingency_matrix(labels_true, labels_pred)
@@ -160,6 +379,21 @@ def entropy(c):
 
 
 def entropy_and_mutual_info(labels_true, labels_pred):
+    """
+    Entropy and mutual information.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float, float, float
+        Entropy of labels_true,
+        Entropy of labels_pred,
+        Mutual information of labels_true and labels_pred.
+    """
+
     c = contingency_matrix(labels_true, labels_pred)
     a = np.sum(c, axis=0)
     b = np.sum(c, axis=1)
@@ -170,11 +404,37 @@ def entropy_and_mutual_info(labels_true, labels_pred):
 
 
 def rand_score(labels_true, labels_pred):
+    """
+    Rand score.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Rand score.
+    """
+
     ss, sd, ds, dd = pairwise_count(labels_true, labels_pred)
     return (ss + dd) / (ss + sd + ds + dd)
 
 
 def adjusted_rand_score(labels_true, labels_pred):
+    """
+    Adjusted rand score.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Adjusted rand score.
+    """
+
     n_samples = labels_true.shape[0]
     n_pairs = n_samples * (n_samples - 1) // 2
     c = contingency_matrix(labels_true, labels_pred)
@@ -192,6 +452,19 @@ def adjusted_rand_score(labels_true, labels_pred):
 
 
 def fowlkes_mallows_score(labels_true, labels_pred):
+    """
+    Fowlkes Mallows score.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Fowlkes Mallows score.
+    """
+
     ss, sd, ds, dd = pairwise_count(labels_true, labels_pred)
     if ss == 0:
         return 0.0
@@ -200,11 +473,37 @@ def fowlkes_mallows_score(labels_true, labels_pred):
 
 
 def mutual_info_score(labels_true, labels_pred):
+    """
+    Mutual information.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Mutual information.
+    """
+
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
     return mi
 
 
 def normalized_mutual_info_score(labels_true, labels_pred):
+    """
+    Normalized mutual information.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Normalized mutual information.
+    """
+
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
     if ha == hb == 0:
         return 1.0
@@ -215,6 +514,19 @@ def normalized_mutual_info_score(labels_true, labels_pred):
 
 
 def homogeneity_score(labels_true, labels_pred):
+    """
+    Homogeneity score.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Homogeneity score
+    """
+
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
 
     if hb == 0:
@@ -226,6 +538,19 @@ def homogeneity_score(labels_true, labels_pred):
 
 
 def completeness_score(labels_true, labels_pred):
+    """
+    Completeness score.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        Completeness score.
+    """
+
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
 
     if ha == 0:
@@ -237,6 +562,19 @@ def completeness_score(labels_true, labels_pred):
 
 
 def v_measure_score(labels_true, labels_pred):
+    """
+    V-measure score.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float
+        V-measure score.
+    """
+
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
 
     if hb == 0:
@@ -258,6 +596,19 @@ def v_measure_score(labels_true, labels_pred):
 
 
 def homogeneity_completeness_v_measure(labels_true, labels_pred):
+    """
+    Homogeneity score, completeness score and V-measure score.
+
+    :param labels_true: array of object (n_samples)
+        True labels.
+
+    :param labels_pred: array of object (n_samples)
+        Predicted labels.
+
+    :return: float, float, float
+        Homogeneity score, completeness score and V-measure score.
+    """
+
     ha, hb, mi = entropy_and_mutual_info(labels_true, labels_pred)
 
     if hb == 0:
@@ -279,6 +630,22 @@ def homogeneity_completeness_v_measure(labels_true, labels_pred):
 
 
 def silhouette_samples(X, labels, metric='l2'):
+    """
+    Silhouette score of each sample.
+
+    :param X: array of float (n_samples * n_features)
+        Points.
+
+    :param labels: array of object (n_samples)
+        Labels.
+
+    :param metric: string (default="l2")
+        Distance metric, "l1", "l2", "l2_square" or "linf".
+
+    :return: array of float (n_samples)
+        Silhouette score of each sample.
+    """
+
     n_samples = X.shape[0]
     a = np.arange(n_samples)
     d = pairwise_distance_function[metric](X, X)
@@ -303,10 +670,39 @@ def silhouette_samples(X, labels, metric='l2'):
 
 
 def silhouette_score(X, labels, metric='l2'):
+    """
+    Silhouette score.
+
+    :param X: array of float (n_samples * n_features)
+        Points.
+
+    :param labels: array of object (n_samples)
+        Labels.
+
+    :param metric: string (default="l2")
+        Distance metric, "l1", "l2", "l2_square" or "linf".
+
+    :return: array of float (n_samples)
+        Silhouette score.
+    """
+
     return np.mean(silhouette_samples(X, labels, metric))
 
 
 def calinski_harabaz_score(X, labels):
+    """
+    Calinski Harabaz score
+
+    :param X: array of float (n_samples * n_features)
+        Points.
+
+    :param labels: array of object (n_samples)
+        Labels.
+
+    :return: array of float (n_samples)
+        Calinski Harabaz score
+    """
+
     n_samples = X.shape[0]
     labels_u, labels_i, labels_c = np.unique(labels, return_inverse=True, return_counts=True)
     n_labels = labels_u.shape[0]
