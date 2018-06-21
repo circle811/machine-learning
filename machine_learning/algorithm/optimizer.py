@@ -173,7 +173,7 @@ class MomentumUpdate(GD):
     def update(self, gradient):
         if self.nesterovs:
             for k in self.parameter:
-                self.m[k] = self.momentum * self.m[k] + gradient[k]
+                self.m[k] = self.momentum * (self.m[k] + gradient[k])
                 self.parameter[k] -= self.learning_rate * (gradient[k] + self.m[k])
         else:
             for k in self.parameter:
